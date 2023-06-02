@@ -60,9 +60,28 @@ class DatabaseControl:
         Returns:
             int: データベースリターンコード
         """
-        # NOTE:データベースへのテーブル作成処理を記述する TBD
-        _table_name: str = table_name
-        _sql: str = f'CREATE TABLE {_table_name}(id INTEGER PRIMARY KEY AUTOINCREMENT,name STRING)'
+        # 引数チェック
+        if table_name == "":
+            print("指定されたテーブル名が空のためエラー")
+            return DatabaseRetCode.DB_CREATE_TABLE_ERROR
+        
+        # 引数チェック
+        if table_data_dict == {} or table_data_dict == None:
+            print("指定されたテーブルデータが空のためエラー")
+            return DatabaseRetCode.DB_CREATE_TABLE_ERROR
+
+        # クエリー作成用変数定義
+        _query: str = ""
+        for record, record_type in table_data_dict.items():
+            # テーブル作成用のクエリーで指定するレコードと型をクエリー作成用変数に設定
+            _query += f"{record} {record_type},"
+           
+        # 末尾のカンマは不要なため削除
+        _query = _query.rstrip(',')
+        # 実行用sqlを生成
+        _sql: str = f'CREATE TABLE {table_name}({_query})'
+        # sql文を実行
+        self.__execute(_sql)
 
         return DatabaseRetCode.SUCCESS
     
