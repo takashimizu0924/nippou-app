@@ -50,6 +50,12 @@ class DatabaseControl:
         self._cur.execute(sql)
         return
     
+    def __commit(self) -> None:
+        """変更適用
+        """
+        self._conn.commit()
+        return
+    
     def create_table(self, table_name: str, table_data_dict: Dict[str, TableDataType]) -> int:
         """テーブル作成
 
@@ -80,8 +86,13 @@ class DatabaseControl:
         _query = _query.rstrip(',')
         # 実行用sqlを生成
         _sql: str = f'CREATE TABLE {table_name}({_query})'
+        # sql文を確認
+        print(f"{_sql}")
+
         # sql文を実行
         self.__execute(_sql)
+        # 変更を適用する
+        self.__commit()
 
         return DatabaseRetCode.SUCCESS
     
@@ -142,10 +153,27 @@ class DatabaseControl:
         Returns:
             Tuple[int, Dict[str, Union[int, str]]]: データベースリターンコード, 応答辞書データ
         """
-        # NOTE: テーブルデータを全て取得し、辞書データにして呼び出し元へ応答する処理を記述する
-        _table_name: str = table_name
-        _sql: str = f'SELECT * FROM {_table_name}'
-        return DatabaseRetCode.SUCCESS, {}
+         # 引数チェック
+        if table_name == "":
+            print("指定されたテーブル名が空のためエラー")
+            return DatabaseRetCode.DB_TABLE_FETCH_RECORD_ERROR, {}
+        
+        # 実行用sqlを生成
+        _sql: str = f'SELECT * FROM {table_name}'
+        # sql文を確認
+        print(f"{_sql}")
+
+        # sql文を実行
+        self.__execute(_sql)
+        # 応答生成
+        rsp_dict = {}
+        rsp_list = self._cur.fetchall()
+        
+
+        for rsp_data_tuple in rsp_list:
+            rsp_dict[rsp_data_tuple[0]] = rsp_data_tuple[1]
+
+        return DatabaseRetCode.SUCCESS, rsp_dict
 
     def disconnection(self) -> int:
         """データベース切断
@@ -157,3 +185,23 @@ class DatabaseControl:
         self._conn.close()
         self._cur.close()
         return DatabaseRetCode.SUCCESS
+
+
+if __name__ == "__main__":
+    # テスト用のデータベース作成
+    db_ctrl = DatabaseControl("test_db")
+
+    # テスト用のテーブルとカラムデータと型を生成
+    db_table_name = "test_table1"
+    column_data_dict = {"sample_name":TableDataType.STR}
+    # テーブル作成テスト
+    ret = db_ctrl.create_table(db_table_name, column_data_dict)
+    # 戻り値を確認
+    print(f"create_table ret = {ret}")
+
+    # テーブル作成テストの結果確認
+    ret, get_data = db_ctrl.get_record_data_from_dict(db_table_name)
+    # 戻り値を確認
+    print(f"get_record_data_from_dict ret = {ret}")
+    for key, value in get_data.items():
+        print(f"get_record_data_from_dict key = {key}, value = {value}")
