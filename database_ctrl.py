@@ -106,9 +106,48 @@ class DatabaseControl:
         Returns:
             int: データベースリターンコード
         """
+        # 引数チェック
+        if table_name == "":
+            print("指定されたテーブル名が空のためエラー")
+            return DatabaseRetCode.DB_TABLE_INSERT_RECORD_ERROR
+        
+        # 引数チェック
+        if record_data_dict == {} or record_data_dict == None:
+            print("指定されたレコードデータが空のためエラー")
+            return DatabaseRetCode.DB_TABLE_INSERT_RECORD_ERROR
+
         # NOTE: テーブルへのレコードデータ挿入処理を記述する
-        _table_name: str = table_name
-        _sql: str = f'CREATE TABLE {_table_name}(id INTEGER PRIMARY KEY AUTOINCREMENT,name STRING)'
+        # クエリー作成用変数定義
+        _column_names: str = ""
+        _values: str = ""
+        for column_name, value in record_data_dict.items():
+            # カラム名をまとめた文字列を作成
+            _column_names += f"{column_name},"
+
+            ## カラムにいれるデータのタイプチェック
+            # カラムに設定する値をまとめた文字列を作成
+            if type(value) is str:
+                # 値が文字列型(str型)の場合
+                _values += f"'{value}',"
+            
+            else:
+                # 値が数値型(int型)の場合
+                _values += f"{value},"
+
+        # 末尾のカンマは不要なため削除
+        _column_names = _column_names.rstrip(',')
+        _values = _values.rstrip(',')
+
+        # 実行用sqlを生成
+        _sql: str = f'INSERT INTO {table_name}({_column_names}) VALUES({_values})'
+        # sql文を確認
+        print(f"{_sql}")
+
+        # sql文を実行
+        self.__execute(_sql)
+        # 変更を適用する
+        self.__commit()
+
         return DatabaseRetCode.SUCCESS
 
     def update_record(self, table_name: str, target_record_data_dict: Dict[str, Union[int, str]], update_record_data_dict: Dict[str, Union[int, str]]) -> int:
@@ -142,7 +181,7 @@ class DatabaseControl:
         _sql: str = f'CREATE TABLE {_table_name}(id INTEGER PRIMARY KEY AUTOINCREMENT,name STRING)'
         return DatabaseRetCode.SUCCESS
 
-    def get_record_data_from_dict(self, table_name: str) -> Tuple[int, Dict[str, Union[int, str]]]:
+    def get_record_data_from_dict(self, table_name: str) -> Tuple[int, List[Tuple[Union[int, str]]]]:
         """レコードデータ取得
             NOTE: データベースリターンコードが「SUCCESS」の場合のみ、辞書データが設定される
                     ※データベースリターンコードが「SUCCESS」以外の場合、辞書データは空で応答する
@@ -151,7 +190,7 @@ class DatabaseControl:
             table_name (str): テーブル名
 
         Returns:
-            Tuple[int, Dict[str, Union[int, str]]]: データベースリターンコード, 応答辞書データ
+            Tuple[int, List[Tuple[Union[int, str]]]]: データベースリターンコード, 応答リストデータ
         """
          # 引数チェック
         if table_name == "":
@@ -165,15 +204,12 @@ class DatabaseControl:
 
         # sql文を実行
         self.__execute(_sql)
+
         # 応答生成
-        rsp_dict = {}
         rsp_list = self._cur.fetchall()
+        print(f"{rsp_list}")
         
-
-        for rsp_data_tuple in rsp_list:
-            rsp_dict[rsp_data_tuple[0]] = rsp_data_tuple[1]
-
-        return DatabaseRetCode.SUCCESS, rsp_dict
+        return DatabaseRetCode.SUCCESS, rsp_list
 
     def disconnection(self) -> int:
         """データベース切断
@@ -195,13 +231,20 @@ if __name__ == "__main__":
     db_table_name = "test_table1"
     column_data_dict = {"sample_name":TableDataType.STR}
     # テーブル作成テスト
-    ret = db_ctrl.create_table(db_table_name, column_data_dict)
-    # 戻り値を確認
-    print(f"create_table ret = {ret}")
+    try:
+        ret = db_ctrl.create_table(db_table_name, column_data_dict)
+        # 戻り値を確認
+        print(f"create_table ret = {ret}")
+    except:
+        pass
+
+    # テーブルデータ挿入テスト
+    column_data_dict = {"sample_name":"テスト太郎"}
+    ret = db_ctrl.insert_recoed(db_table_name, column_data_dict)
 
     # テーブル作成テストの結果確認
-    ret, get_data = db_ctrl.get_record_data_from_dict(db_table_name)
+    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name)
     # 戻り値を確認
     print(f"get_record_data_from_dict ret = {ret}")
-    for key, value in get_data.items():
-        print(f"get_record_data_from_dict key = {key}, value = {value}")
+    for data in get_data_list:
+        print(f"get_record_data_from_dict key = {data}")
