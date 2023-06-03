@@ -218,8 +218,9 @@ class DatabaseControl:
             int: データベースリターンコード
         """
         # NOTE: データベース切断処理を記述する
-        self._conn.close()
         self._cur.close()
+        self._conn.close()
+        print("データベース切断完了")
         return DatabaseRetCode.SUCCESS
 
 
@@ -248,3 +249,6 @@ if __name__ == "__main__":
     print(f"get_record_data_from_dict ret = {ret}")
     for data in get_data_list:
         print(f"get_record_data_from_dict key = {data}")
+
+    # テスト終了のためデータベース切断
+    db_ctrl.disconnection()
