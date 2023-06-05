@@ -157,7 +157,7 @@ class DatabaseControl:
 
         Args:
             table_name (str): テーブル名
-            target_record_data_dict (Dict[str, Union[int, str]]): 更新対象のレコードデータ(辞書データ)
+            id (int): 更新対象のID
             update_record_data_dict (Dict[str, Union[int, str]]): レコード更新データ(辞書データ)
 
         Returns:
