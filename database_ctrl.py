@@ -211,19 +211,36 @@ class DatabaseControl:
 
         return DatabaseRetCode.SUCCESS
 
-    def delete_record(self, table_name: str, target_record_data_dict: Dict[str, Union[int, str]]) -> int:
+    def delete_record(self, table_name: str, id: int) -> int:
         """レコードデータ削除
 
         Args:
             table_name (str): テーブル名
-            target_record_data_dict (Dict[str, Union[int, str]]): 削除対象のレコードデータ(辞書データ)
+            id (int): 削除対象のID
 
         Returns:
             int: データベースリターンコード
         """
-        # NOTE: テーブルへのレコードデータ削除処理を記述する
-        _table_name: str = table_name
-        _sql: str = f'CREATE TABLE {_table_name}(id INTEGER PRIMARY KEY AUTOINCREMENT,name STRING)'
+
+        # 引数チェック
+        if table_name == "":
+            print("指定されたテーブル名が空のためエラー")
+            return DatabaseRetCode.DB_TABLE_DELETE_RECORD_ERROR
+
+        # 引数チェック
+        if id <= 0:
+            print("指定されたIDが 0 以下のためエラー")
+            return DatabaseRetCode.DB_TABLE_DELETE_RECORD_ERROR
+
+        _sql: str = f'DELETE FROM {table_name} WHERE ID = {id}'
+        # sql文を確認
+        print(f"{_sql}")
+
+        # sql文を実行
+        self.__execute(_sql)
+        # 変更を適用する
+        self.__commit()
+
         return DatabaseRetCode.SUCCESS
 
     def get_record_data_from_dict(self, table_name: str) -> Tuple[int, List[Tuple[Union[int, str]]]]:
@@ -299,6 +316,29 @@ if __name__ == "__main__":
     id_data = 1
     update_data_dict = {"sample_name":"テスト次郎"}
     ret = db_ctrl.update_record(db_table_name, id_data, update_data_dict)
+
+    # テーブル作成テストの結果確認
+    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name)
+    # 戻り値を確認
+    print(f"get_record_data_from_dict ret = {ret}")
+    for data in get_data_list:
+        print(f"get_record_data_from_dict key = {data}")
+
+    # 削除確認用にデータ挿入1
+    column_data_dict = {"sample_name":"テスト三郎"}
+    ret = db_ctrl.insert_recoed(db_table_name, column_data_dict)
+
+    # テーブル作成テストの結果確認
+    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name)
+    # 戻り値を確認
+    print(f"get_record_data_from_dict ret = {ret}")
+    for data in get_data_list:
+        print(f"get_record_data_from_dict key = {data}")
+    
+    # デーブルデータ削除結果確認
+    id_data = 1
+    # delete_data_dict = {"sample_name":"テスト次郎"}
+    ret = db_ctrl.delete_record(db_table_name, id_data)
 
     # テーブル作成テストの結果確認
     ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name)
