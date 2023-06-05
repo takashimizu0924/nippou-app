@@ -18,7 +18,26 @@ class AppDataControl:
         """コンストラクタ
             NOTE: データベースの初期化処理を行う
         """
-        pass
+        # データベース作成 (※NOTE:既にDBが存在する場合は接続)
+        _database_name: str = "nippo_app"
+        self._db_ctrl = DatabaseControl(_database_name)
+
+        # テーブル名を生成＆アプリ設定情報インスタンス生成
+        db_table_name: str = "nippo"
+        app_config: AppConfig = AppConfig()
+        
+        # テーブル作成テスト
+        try:
+            ret = self._db_ctrl.create_table(db_table_name, app_config.db_table_data_dict)
+            print(f"create_table ret = {ret}")
+            # 戻り値チェック
+            if not ret == DatabaseRetCode.SUCCESS:
+                raise Exception()
+            
+        except Exception:
+            # DB切断して呼び出し元にエラーを通知 NOTE: 不要なら削除する
+            self._db_ctrl.disconnection()
+            raise Exception("__init__:[AppDataControl Class]-> Error occured. Create database table error.")
 
     def register(self, req: DataRegistReq) -> bool:
         """データ登録
@@ -65,29 +84,24 @@ class AppDataControl:
         pass
 
 
-class DbConfigData:
-    """データベース設定用データ
+class AppConfig:
+    """アプリ用設定データクラス
     """
     def __init__(self) -> None:
         """コンストラクタ
             NOTE: 引数説明
-            - column_work_date      : 工事日情報 ※文字列
-            - column_company_name   : 会社名情報 ※文字列
-            - column_work_place     : 現場名情報 ※文字列
-            - column_work_contents  : 作業内容情報 ※文字列
-            - column_worker_num     : 作業員数情報 ※数値
-            - column_worker_cost    : 作業員代情報 ※数値
-            - column_material_cost  : 材料費情報 ※数値
-            - column_proceeds       : 売上金額情報 ※数値
+            - db_table_data_dict    : データベース設定用辞書データ NOTE:カラム情報
         """
-        self.column_work_date: Dict[str,TableDataType]      = {"WORK_DATE": TableDataType.STR}
-        self.column_company_name: Dict[str,TableDataType]   = {"COMPANY_NAME": TableDataType.STR}
-        self.column_work_place: Dict[str,TableDataType]     = {"WORK_PLACE": TableDataType.STR}
-        self.column_work_contents: Dict[str,TableDataType]  = {"WORK_CONTENTS": TableDataType.STR}
-        self.column_worker_num: Dict[str,TableDataType]     = {"WORKER_NUM": TableDataType.INT}
-        self.column_worker_cost: Dict[str,TableDataType]    = {"WORKER_COST": TableDataType.INT}
-        self.column_material_cost: Dict[str,TableDataType]  = {"MATERIAL_COST": TableDataType.INT}
-        self.column_proceeds: Dict[str,TableDataType]       = {"PROCEEDS": TableDataType.INT}
+        self.db_table_data_dict: Dict[str, TableDataType] = {
+            "WORK_DATE": TableDataType.STR,
+            "COMPANY_NAME": TableDataType.STR,
+            "WORK_PLACE": TableDataType.STR,
+            "WORK_CONTENTS": TableDataType.STR,
+            "WORKER_NUM": TableDataType.INT,
+            "WORKER_COST": TableDataType.INT,
+            "MATERIAL_COST": TableDataType.INT,
+            "PROCEEDS": TableDataType.INT,
+        }
 
 class DataRegistReq:
     """データ登録制御 要求クラス
