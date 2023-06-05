@@ -9,11 +9,13 @@ from typing import (Union, List, Dict, Tuple)
 class TableDataType:
     """テーブルデータ型クラス
     """
-    NULL: str   = "NULL"
-    INT: str    = "INTEGER"
-    FLOAT: str  = "REAL"
-    STR: str    = "TEXT"
-    BYTES: str  = "BLOB"
+    NULL: str           = "NULL"
+    INT: str            = "INTEGER"
+    FLOAT: str          = "REAL"
+    STR: str            = "TEXT"
+    BYTES: str          = "BLOB"
+    PRIMARY_KEY: str    = "PRIMARY KEY"
+    AUTO_INC: str       = "AUTOINCREMENT"
 
 class DatabaseRetCode:
     """データベースリターンコード
@@ -150,7 +152,7 @@ class DatabaseControl:
 
         return DatabaseRetCode.SUCCESS
 
-    def update_record(self, table_name: str, target_record_data_dict: Dict[str, Union[int, str]], update_record_data_dict: Dict[str, Union[int, str]]) -> int:
+    def update_record(self, table_name: str, id: int, update_record_data_dict: Dict[str, Union[int, str]]) -> int:
         """レコードデータ更新
 
         Args:
@@ -161,9 +163,52 @@ class DatabaseControl:
         Returns:
             int: データベースリターンコード
         """
-        # NOTE: テーブルへのレコードデータ更新処理を記述する
-        _table_name: str = table_name
-        _sql: str = f'CREATE TABLE {_table_name}(id INTEGER PRIMARY KEY AUTOINCREMENT,name STRING)'
+        # 引数チェック
+        if table_name == "":
+            print("指定されたテーブル名が空のためエラー")
+            return DatabaseRetCode.DB_TABLE_UPDATE_RECORD_ERROR
+        
+        # 引数チェック
+        if id <= 0:
+            print("指定されたIDが 0 以下のためエラー")
+            return DatabaseRetCode.DB_TABLE_UPDATE_RECORD_ERROR
+        
+        # 引数チェック
+        if update_record_data_dict == {} or update_record_data_dict == None:
+            print("指定されたレコードデータが空のためエラー")
+            return DatabaseRetCode.DB_TABLE_UPDATE_RECORD_ERROR
+
+        # クエリー作成用変数定義
+        _query: str = ""
+        for column_name, value in update_record_data_dict.items():
+            # カラム名をまとめるための文字列を作成
+            _values: str = ""
+
+            ## カラムにいれるデータのタイプチェック
+            # カラムに設定する値をまとめた文字列を作成
+            if type(value) is str:
+                # 値が文字列型(str型)の場合
+                _values = f'"{value}",'
+            
+            else:
+                # 値が数値型(int型)の場合
+                _values = f"{value},"
+
+            _query += f"{column_name} = {_values},"
+
+        # 末尾のカンマは不要なため削除
+        _query = _query.rstrip(',')
+
+        # 実行用sqlを生成
+        _sql: str = f'UPDATE {table_name} SET {_query} WHERE ID = {id}'
+        # sql文を確認
+        print(f"{_sql}")
+
+        # sql文を実行
+        self.__execute(_sql)
+        # 変更を適用する
+        self.__commit()
+
         return DatabaseRetCode.SUCCESS
 
     def delete_record(self, table_name: str, target_record_data_dict: Dict[str, Union[int, str]]) -> int:
@@ -229,8 +274,8 @@ if __name__ == "__main__":
     db_ctrl = DatabaseControl("test_db")
 
     # テスト用のテーブルとカラムデータと型を生成
-    db_table_name = "test_table1"
-    column_data_dict = {"sample_name":TableDataType.STR}
+    db_table_name = "test_table7"
+    column_data_dict = {"id":(f"{TableDataType.INT} {TableDataType.PRIMARY_KEY} {TableDataType.AUTO_INC}"),"sample_name":TableDataType.STR}
     # テーブル作成テスト
     try:
         ret = db_ctrl.create_table(db_table_name, column_data_dict)
@@ -242,6 +287,18 @@ if __name__ == "__main__":
     # テーブルデータ挿入テスト
     column_data_dict = {"sample_name":"テスト太郎"}
     ret = db_ctrl.insert_recoed(db_table_name, column_data_dict)
+
+    # テーブル作成テストの結果確認
+    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name)
+    # 戻り値を確認
+    print(f"get_record_data_from_dict ret = {ret}")
+    for data in get_data_list:
+        print(f"get_record_data_from_dict key = {data}")
+    
+    # テーブルデータ更新結果確認
+    id_data = 1
+    update_data_dict = {"sample_name":"テスト次郎"}
+    ret = db_ctrl.update_record(db_table_name, id_data, update_data_dict)
 
     # テーブル作成テストの結果確認
     ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name)
