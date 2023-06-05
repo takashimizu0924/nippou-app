@@ -25,9 +25,8 @@ class AppDataControl:
         # テーブル名を生成＆アプリ設定情報インスタンス生成
         db_table_name: str = "nippo"
         app_config: AppConfig = AppConfig()
-        
-        # テーブル作成テスト
         try:
+            # テーブル作成
             ret = self._db_ctrl.create_table(db_table_name, app_config.db_table_data_dict)
             print(f"create_table ret = {ret}")
             # 戻り値チェック
