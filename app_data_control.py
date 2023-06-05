@@ -73,7 +73,7 @@ class AppDataControl:
 
         # 戻り値チェック
         if not ret == DatabaseRetCode.SUCCESS:
-            print(f"register:[AppDataControl Class]-> Error occured. Data registration failed.")
+            print(f"register:[AppDataControl Class]-> Error occured. Register data failed.")
             return _rsp
         
         # 応答設定(正常)
@@ -103,7 +103,7 @@ class AppDataControl:
 
         # 戻り値チェック
         if not ret == DatabaseRetCode.SUCCESS:
-            print(f"update:[AppDataControl Class]-> Error occured. Data update failed.")
+            print(f"update:[AppDataControl Class]-> Error occured. Update data failed.")
             return _rsp
         
         # 応答設定(正常)
@@ -119,7 +119,26 @@ class AppDataControl:
         Returns:
             bool: 結果応答 (True: 成功 / False: 失敗)
         """
-        pass
+        ## 応答生成
+        _rsp: bool = False
+        
+        ## 引数チェック
+        if req is None:
+            # エラー応答
+            print(f"delete:[AppDataControl Class]-> Error occured. Request parameter is none.")
+            return _rsp
+
+        ## データ登録実行
+        ret: int = self._db_ctrl.delete_record(self.db_table_name, req.target_id)
+
+        # 戻り値チェック
+        if not ret == DatabaseRetCode.SUCCESS:
+            print(f"delete:[AppDataControl Class]-> Error occured. Delete data failed.")
+            return _rsp
+        
+        # 応答設定(正常)
+        _rsp = True
+        return _rsp
 
     def fetch(self, req: DataFetchReq) -> DataFetchRsp:
         """データ取得
