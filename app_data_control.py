@@ -140,16 +140,51 @@ class AppDataControl:
         _rsp = True
         return _rsp
 
-    def fetch(self, req: DataFetchReq) -> DataFetchRsp:
+    def fetch(self, req: DataFetchReq) -> List[DataFetchRsp]:
         """データ取得
+            NOTE: DBでエラーが発生した場合は呼び出し元にNoneを応答する
 
         Args:
             req (DataFetchReq): データ取得制御要求
 
         Returns:
-            DataFetchRsp: データ取得応答
+            List[DataFetchRsp]: データ取得応答リスト
         """
-        pass
+        ## 応答用配列生成
+        _rsp_list: List[DataFetchRsp] = None
+        
+        ## 引数チェック
+        if req is None:
+            # エラー応答
+            print(f"fetch:[AppDataControl Class]-> Error occured. Request parameter is none.")
+            return _rsp
+
+        ## データ登録実行
+        ret_code, ret_data = self._db_ctrl.get_record_data_from_dict(self.db_table_name, req.company_name)
+
+        # 戻り値チェック
+        if not ret_code == DatabaseRetCode.SUCCESS:
+            print(f"fetch:[AppDataControl Class]-> Error occured. Fetch data failed.")
+            return _rsp
+
+        # 応答解析
+        for _fetch_data in ret_data:
+            # 応答生成
+            _rsp: DataFetchRsp = DataFetchRsp()
+            # 応答データ設定
+            _rsp.id                 = _fetch_data[0]
+            _rsp.work_date          = _fetch_data[1]
+            _rsp.company_name       = _fetch_data[2]
+            _rsp.work_place         = _fetch_data[3]
+            _rsp.work_contents      = _fetch_data[4]
+            _rsp.worker_num         = _fetch_data[5]
+            _rsp.worker_cost        = _fetch_data[6]
+            _rsp.material_cost      = _fetch_data[7]
+            _rsp.proceeds           = _fetch_data[8]
+            # 応答用配列に追加
+            _rsp_list.append(_rsp)
+
+        return _rsp_list
 
 
 class AppConfig:
