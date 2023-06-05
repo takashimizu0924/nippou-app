@@ -23,11 +23,11 @@ class AppDataControl:
         self._db_ctrl = DatabaseControl(_database_name)
 
         # テーブル名を生成＆アプリ設定情報インスタンス生成
-        db_table_name: str = "nippo"
+        self.db_table_name: str = "nippo"
         app_config: AppConfig = AppConfig()
         try:
             # テーブル作成
-            ret = self._db_ctrl.create_table(db_table_name, app_config.db_table_data_dict)
+            ret = self._db_ctrl.create_table(self.db_table_name, app_config.db_table_data_dict)
             print(f"create_table ret = {ret}")
             # 戻り値チェック
             if not ret == DatabaseRetCode.SUCCESS:
@@ -47,7 +47,38 @@ class AppDataControl:
         Returns:
             bool: 結果応答 (True: 成功 / False: 失敗)
         """
-        pass
+        ## 応答生成
+        _rsp: bool = False
+        
+        ## 引数チェック
+        if req is None:
+            # エラー応答
+            print(f"register:[AppDataControl Class]-> Error occured. Request parameter is none.")
+            return _rsp
+        
+        ## 要求生成
+        _req: dict = {
+            "WORK_DATE": req.work_date,
+            "COMPANY_NAME": req.company_name,
+            "WORK_PLACE": req.work_place,
+            "WORK_CONTENTS": req.work_contents,
+            "WORKER_NUM": req.worker_num,
+            "WORKER_COST": req.worker_cost,
+            "MATERIAL_COST": req.material_cost,
+            "PROCEEDS": req.proceeds,
+        }
+
+        ## データ登録実行
+        ret: int = self._db_ctrl.insert_recoed(self.db_table_name, _req)
+
+        # 戻り値チェック
+        if not ret == DatabaseRetCode.SUCCESS:
+            print(f"register:[AppDataControl Class]-> Error occured. Request parameter is none.")
+            return _rsp
+        
+        # 応答設定(正常)
+        _rsp = True
+        return _rsp
 
     def update(self, req: DataUpdateReq) -> bool:
         """データ更新
@@ -92,6 +123,7 @@ class AppConfig:
             - db_table_data_dict    : データベース設定用辞書データ NOTE:カラム情報
         """
         self.db_table_data_dict: Dict[str, TableDataType] = {
+            "ID": (f"{TableDataType.INT} {TableDataType.PRIMARY_KEY} {TableDataType.AUTO_INC}"),
             "WORK_DATE": TableDataType.STR,
             "COMPANY_NAME": TableDataType.STR,
             "WORK_PLACE": TableDataType.STR,
