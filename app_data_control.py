@@ -71,7 +71,7 @@ class DbConfigData:
     def __init__(self) -> None:
         """コンストラクタ
             NOTE: 引数説明
-            - column_work_date      : 工事日情報 NOTE:(YYYY/MM/DDの形式) ※文字列
+            - column_work_date      : 工事日情報 ※文字列
             - column_company_name   : 会社名情報 ※文字列
             - column_work_place     : 現場名情報 ※文字列
             - column_work_contents  : 作業内容情報 ※文字列
@@ -95,9 +95,23 @@ class DataRegistReq:
     def __init__(self) -> None:
         """コンストラクタ
             NOTE: 引数説明
-            - XXX: ～～データ
+            - work_date     : 工事日データ NOTE:(YYYY/MM/DDの形式) 
+            - company_name  : 会社名データ
+            - work_place    : 現場名データ
+            - work_contents : 作業内容データ
+            - worker_num    : 作業員数データ
+            - worker_cost   : 作業員代データ
+            - material_cost : 材料費データ
+            - proceeds      : 売上金額データ
         """
-        pass
+        self.work_date: str     = ""
+        self.company_name: str  = ""
+        self.work_place: str    = ""
+        self.work_contents: str = ""
+        self.worker_num: int    = 0
+        self.worker_cost: int   = 0
+        self.material_cost: int = 0
+        self.proceeds: int      = 0
 
 class DataUpdateReq:
     """データ更新制御 要求クラス
@@ -105,9 +119,11 @@ class DataUpdateReq:
     def __init__(self) -> None:
         """コンストラクタ
             NOTE: 引数説明
-            - XXX: ～～データ
+            - target_id     : 更新対象IDデータ
+            - update_data   : 更新データ ※NOTE: キーは必ず更新対象のカラム名を指定すること
         """
-        pass
+        self.target_id: int                             = 0
+        self.update_data: Dict[str, Union[int, str]]    = {}
 
 class DataDeleteReq:
     """データ削除制御 要求クラス
@@ -115,9 +131,9 @@ class DataDeleteReq:
     def __init__(self) -> None:
         """コンストラクタ
             NOTE: 引数説明
-            - XXX: ～～データ
+            - target_id: 削除対象IDデータ
         """
-        pass
+        self.target_id: int = 0
 
 class DataFetchReq:
     """データ取得制御 要求クラス
@@ -125,9 +141,9 @@ class DataFetchReq:
     def __init__(self) -> None:
         """コンストラクタ
             NOTE: 引数説明
-            - XXX: ～～データ
+            - company_name: 会社名データ
         """
-        pass
+        self.company_name: str = ""
 
 class DataFetchRsp:
     """データ取得制御 応答クラス
@@ -135,6 +151,22 @@ class DataFetchRsp:
     def __init__(self) -> None:
         """コンストラクタ
             NOTE: 引数説明
-            - XXX: ～～データ
+            - id            : IDデータ
+            - work_date     : 工事日データ NOTE:(YYYY/MM/DDの形式) 
+            - company_name  : 会社名データ
+            - work_place    : 現場名データ
+            - work_contents : 作業内容データ
+            - worker_num    : 作業員数データ
+            - worker_cost   : 作業員代データ
+            - material_cost : 材料費データ
+            - proceeds      : 売上金額データ
         """
-        pass
+        self.id: int            = ""
+        self.work_date: str     = ""
+        self.company_name: str  = ""
+        self.work_place: str    = ""
+        self.work_contents: str = ""
+        self.worker_num: int    = 0
+        self.worker_cost: int   = 0
+        self.material_cost: int = 0
+        self.proceeds: int      = 0
