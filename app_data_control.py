@@ -3,12 +3,10 @@
 
 # アノテーション用パッケージ
 from __future__ import annotations
-from typing import TYPE_CHECKING
 from typing import (List, Tuple, Dict, Optional, Union)
 
 # データベース制御パッケージ
-if TYPE_CHECKING:
-    from database_ctrl import (TableDataType, DatabaseRetCode, DatabaseControl)
+from database_ctrl import (TableDataType, DatabaseRetCode, DatabaseControl)
 
 class AppDataControl:
     """アプリケーションデータ制御クラス
@@ -34,9 +32,8 @@ class AppDataControl:
                 raise Exception()
             
         except Exception:
-            # DB切断して呼び出し元にエラーを通知 NOTE: 不要なら削除する
-            self._db_ctrl.disconnection()
-            raise Exception("__init__:[AppDataControl Class]-> Error occured. Create database table error.")
+            # 既に作成されているテーブルを指定した場合はSUCCESSを表示
+            print(f"target table is already exists. processing is SUCCESS")
 
     def register(self, req: DataRegistReq) -> bool:
         """データ登録
@@ -185,6 +182,12 @@ class AppDataControl:
             _rsp_list.append(_rsp)
 
         return _rsp_list
+    
+    def terminate(self) -> None:
+        """終了処理
+        """
+        self._db_ctrl.disconnection()
+        return
 
 
 class AppConfig:
@@ -259,9 +262,11 @@ class DataFetchReq:
     def __init__(self) -> None:
         """コンストラクタ
             NOTE: 引数説明
-            - company_name: 会社名データ
+            - id            : IDデータ
+            - company_name  : 会社名データ
         """
-        self.company_name: str = ""
+        self.id: int            = 0
+        self.company_name: str  = ""
 
 class DataFetchRsp:
     """データ取得制御 応答クラス
