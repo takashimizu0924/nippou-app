@@ -66,7 +66,7 @@ class AppDataControl:
         }
 
         ## データ登録実行
-        ret: int = self._db_ctrl.insert_recoed(self.db_table_name, _req)
+        ret: int = self._db_ctrl.insert_record(self.db_table_name, _req)
 
         # 戻り値チェック
         if not ret == DatabaseRetCode.SUCCESS:
@@ -155,9 +155,15 @@ class AppDataControl:
             # エラー応答
             print(f"fetch:[AppDataControl Class]-> Error occured. Request parameter is none.")
             return _rsp
+        
+        ## 要求辞書データ作成
+        _req: dict = {
+            "ID": req.id,
+            "COMPANY_NAME": req.company_name
+        }
 
         ## データ登録実行
-        ret_code, ret_data = self._db_ctrl.get_record_data_from_dict(self.db_table_name, req.company_name)
+        ret_code, ret_data = self._db_ctrl.get_record_data_from_dict(self.db_table_name, _req)
 
         # 戻り値チェック
         if not ret_code == DatabaseRetCode.SUCCESS:

@@ -98,7 +98,7 @@ class DatabaseControl:
 
         return DatabaseRetCode.SUCCESS
     
-    def insert_recoed(self, table_name: str, record_data_dict: Dict[str, Union[int, str]]) -> int:
+    def insert_record(self, table_name: str, record_data_dict: Dict[str, Union[int, str]]) -> int:
         """レコードデータ挿入
 
         Args:
@@ -243,24 +243,59 @@ class DatabaseControl:
 
         return DatabaseRetCode.SUCCESS
 
-    def get_record_data_from_dict(self, table_name: str) -> Tuple[int, List[Tuple[Union[int, str]]]]:
+    def get_record_data_from_dict(self, table_name: str, req_data_dict: dict) -> Tuple[int, List[Tuple[Union[int, str]]]]:
         """レコードデータ取得
             NOTE: データベースリターンコードが「SUCCESS」の場合のみ、辞書データが設定される
                     ※データベースリターンコードが「SUCCESS」以外の場合、辞書データは空で応答する
 
         Args:
             table_name (str): テーブル名
+            req_data_dict (dict): 取得要求辞書データ
 
         Returns:
             Tuple[int, List[Tuple[Union[int, str]]]]: データベースリターンコード, 応答リストデータ
         """
-         # 引数チェック
+        # 引数チェック
         if table_name == "":
             print("指定されたテーブル名が空のためエラー")
             return DatabaseRetCode.DB_TABLE_FETCH_RECORD_ERROR, {}
         
+         # クエリー作成用変数定義
+        _query: str = ""
+        
+        # 複数条件判定用変数定義
+        _is_multiple: bool = False
+        
+        # 要求データありの場合
+        if not (req_data_dict == {} or req_data_dict == None):
+            # SQLに取得条件を追加
+            _query += " WHERE "
+            for column_name, value in req_data_dict.items():
+                # 複数条件判定
+                if _is_multiple:
+                    _query += " AND "
+
+                # カラム名をまとめるための文字列を作成
+                _values: str = ""
+
+                ## カラムにいれるデータのタイプチェック
+                if type(value) is str:
+                    # 値が文字列型(str型)の場合
+                    _values = f'"{value}"'
+                
+                else:
+                    # 値が数値型(int型)の場合
+                    _values = f"{value}"
+
+                _query += f"{column_name} = {_values}"
+                # 複数条件判定用フラグを立てる
+                _is_multiple = True
+
+        # 末尾のカンマは不要なため削除
+        _query = _query.rstrip(',')
+        
         # 実行用sqlを生成
-        _sql: str = f'SELECT * FROM {table_name}'
+        _sql: str = f'SELECT * FROM {table_name}{_query}'
         # sql文を確認
         print(f"{_sql}")
 
@@ -303,10 +338,10 @@ if __name__ == "__main__":
 
     # テーブルデータ挿入テスト
     column_data_dict = {"sample_name":"テスト太郎"}
-    ret = db_ctrl.insert_recoed(db_table_name, column_data_dict)
+    ret = db_ctrl.insert_record(db_table_name, column_data_dict)
 
     # テーブル作成テストの結果確認
-    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name)
+    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name, None)
     # 戻り値を確認
     print(f"get_record_data_from_dict ret = {ret}")
     for data in get_data_list:
@@ -318,7 +353,7 @@ if __name__ == "__main__":
     ret = db_ctrl.update_record(db_table_name, id_data, update_data_dict)
 
     # テーブル作成テストの結果確認
-    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name)
+    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name, None)
     # 戻り値を確認
     print(f"get_record_data_from_dict ret = {ret}")
     for data in get_data_list:
@@ -326,10 +361,10 @@ if __name__ == "__main__":
 
     # 削除確認用にデータ挿入1
     column_data_dict = {"sample_name":"テスト三郎"}
-    ret = db_ctrl.insert_recoed(db_table_name, column_data_dict)
+    ret = db_ctrl.insert_record(db_table_name, column_data_dict)
 
     # テーブル作成テストの結果確認
-    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name)
+    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name, None)
     # 戻り値を確認
     print(f"get_record_data_from_dict ret = {ret}")
     for data in get_data_list:
@@ -341,7 +376,8 @@ if __name__ == "__main__":
     ret = db_ctrl.delete_record(db_table_name, id_data)
 
     # テーブル作成テストの結果確認
-    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name)
+    get_req_data: dict = {"ID": 5}
+    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name, get_req_data)
     # 戻り値を確認
     print(f"get_record_data_from_dict ret = {ret}")
     for data in get_data_list:
