@@ -45,6 +45,12 @@ class WorkDate(TextBox):
         tstr = tdatetime.strftime('%Y/%m/%d')
         defalut_text = tstr
         super().__init__(frame,self.label_text,box_width,defalut_text)
+
+    def set_today(self) -> None:
+        tdatetime = dt.now() 
+        tstr = tdatetime.strftime('%Y/%m/%d')
+        self._textbox.insert(tk.END, tstr)
+        return
     
 
 class Company(TextBox):
@@ -68,8 +74,11 @@ class Company(TextBox):
         self.input_text = self.input_combo.get()
         if self.input_text == "":
             messagebox.showwarning("確認","'"+self.label_text+"'"+"は必ず入力するかプルダウンから選択してください")
-        else:
-            return str(self.input_text)
+        return str(self.input_text)
+    
+    def clear_field(self) -> None:
+        self._conbobox.set('')
+        return
 
 
 class WorkPlace(TextBox):
@@ -98,8 +107,11 @@ class Worker(TextBox):
         self.input_text = self.input_combo.get()
         if self.input_text == "":
             messagebox.showwarning("確認","'"+self.label_text+"'"+"は必ず入力するかプルダウンから選択してください")
-        else:
-            return str(self.input_text)
+        return str(self.input_text)
+    
+    def clear_field(self) -> None:
+        self._conbobox.set('')
+        return
 
 
 class WorkerCost(TextBox):
@@ -111,8 +123,7 @@ class WorkerCost(TextBox):
         self.input_text = self._textbox.get()
         if self.input_text == "":
             messagebox.showwarning("確認","'"+self.label_text+"'"+"は数値で入力してください")
-        else:
-            return int(self.input_text)
+        return int(self.input_text)
 
 
 class MaterialCost(TextBox):
@@ -124,8 +135,7 @@ class MaterialCost(TextBox):
         self.input_text = self._textbox.get()
         if self.input_text == "":
             messagebox.showwarning("確認","'"+self.label_text+"'"+"は数値で入力してください")
-        else:
-            return int(self.input_text)
+        return int(self.input_text)
 
 
 class Sales(TextBox):
@@ -137,5 +147,4 @@ class Sales(TextBox):
         self.input_text = self._textbox.get()
         if self.input_text == "":
             messagebox.showwarning("確認","'"+self.label_text+"'"+"は数値で入力してください")
-        else:
-            return int(self.input_text)       
+        return int(self.input_text)       

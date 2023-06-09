@@ -195,6 +195,18 @@ class Window():
 
         s = self.ctl.register(self.register_data)
         print(s)
+        self.clear_input_area()
+    
+    def clear_input_area(self):
+        self.work_date.delete_input_value()
+        self.work_date.set_today()
+        self.company.clear_field()
+        self.work_place.delete_input_value()
+        self.work_detail.delete_input_value()
+        self.worker.clear_field()
+        self.worker_cost.delete_input_value()
+        self.material_cost.delete_input_value()
+        self.sales.delete_input_value()
     
     def get_data(self):
         self.ctl = ctl.AppDataControl()
