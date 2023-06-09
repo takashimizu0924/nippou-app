@@ -148,7 +148,7 @@ class AppDataControl:
             List[DataFetchRsp]: データ取得応答リスト
         """
         ## 応答用配列生成
-        _rsp_list: List[DataFetchRsp] = None
+        _rsp_list: List[DataFetchRsp] = []
         
         ## 引数チェック
         if req is None:
@@ -168,7 +168,7 @@ class AppDataControl:
         # 戻り値チェック
         if not ret_code == DatabaseRetCode.SUCCESS:
             print(f"fetch:[AppDataControl Class]-> Error occured. Fetch data failed.")
-            return _rsp
+            return _rsp_list
 
         # 応答解析
         for _fetch_data in ret_data:
