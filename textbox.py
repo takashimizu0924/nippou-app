@@ -65,6 +65,14 @@ class Company(TextBox):
         self.label_text = "会社名"
         super().__init__(frame,self.label_text,box_width)
         self._conbobox = ttk.Combobox(frame,textvariable=self.input_combo,values=values,font=('meiryo',10),style='Combo.TCombobox',)
+        self._conbobox.bind(
+            '<<ComboboxSelected>>', 
+            self.selected_cb
+        )
+
+    def selected_cb(self, event) -> None:
+        print("Pressed")
+        return
 
 class WorkPlace(TextBox):
     def __init__(self, frame, box_width=0) -> None:
