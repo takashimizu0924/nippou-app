@@ -24,7 +24,8 @@ class Window():
         self.change_page_button = tk.Button(self.input_frame,text='日報閲覧',command=self.change_frame_browse,font=('meiryo',8),width=8)
         self.input_title = tk.Label(self.input_frame,text='日報入力',font=('meiryo',15))
         self.work_date = tb.WorkDate(self.input_frame)
-        self.company = tb.Company(self.input_frame)
+        values = self.get_company_name()
+        self.company = tb.Company(self.input_frame,values=values)
         self.work_place = tb.WorkPlace(self.input_frame)
         self.work_detail = tb.WorkDetail(self.input_frame,80)
         self.worker = tb.Worker(self.input_frame)
@@ -77,7 +78,8 @@ class Window():
         self.sales = 55555
         self.change_page_button = tk.Button(self.browse_frame,text='日報入力',command=self.change_frame_input,font=('meiryo',8),width=8)
         self.browes_title = tk.Label(self.browse_frame,text='日報閲覧',font=('meiryo',15))
-        self.company = tb.Company(self.browse_frame)
+        values = self.get_company_name()
+        self.company = tb.Company(self.browse_frame,values=values)
         self.total_cost_label = tk.Label(self.browse_frame,text="X月合計経費",font=('meiryo',10))
         self.show_total_cost = tk.Label(self.browse_frame,text="¥"+self.total_cost,relief="sunken",anchor=tk.E,width=35)
         self.total_sales_label = tk.Label(self.browse_frame,text="X月合計売上",font=('meiryo',10))
@@ -127,7 +129,7 @@ class Window():
         self.get_worker_label = tk.Label(self.browse_frame,text="0",font=('meiryo',10),borderwidth=2,relief="ridge",width=8,anchor=tk.E)
         self.get_cost_label = tk.Label(self.browse_frame,text="2534",font=('meiryo',10),borderwidth=2,relief="ridge",width=15,anchor=tk.E)
         self.get_sales_label = tk.Label(self.browse_frame,text="55000",font=('meiryo',10),borderwidth=2,relief="ridge",width=15,anchor=tk.E)
-        self.delete_button = tk.Button(self.browse_frame,text="削除")
+        self.delete_button = tk.Button(self.browse_frame,text="削除",command=self.get_data)
         self.update_button = tk.Button(self.browse_frame,text="変更")
         
         self.get_date_label.grid(row=6,column=0,columnspan=1,sticky=tk.W+tk.E)
@@ -161,7 +163,13 @@ class Window():
         """
         
         return 
-        
+    # def add_data(self):
+    #     dbc = database_ctrl.DatabaseControl("test.db")
+    #     d = {}
+    #     d["name"] = "shimizu"
+    #     e = dbc.create_table("test1",d)
+    #     print(e)
+    #     return
     def add_data(self):
         """データベースに登録
         id -> primary_key
@@ -175,7 +183,7 @@ class Window():
         sales -> sales
         """
         
-        self.ctl = ctl.AppDataControl
+        self.ctl = ctl.AppDataControl()
         self.register_data = ctl.DataRegistReq()
         # self.register_data.work_date = self.work_date
         # self.register_data.company_name = self.company_name
@@ -186,20 +194,57 @@ class Window():
         # self.register_data.material_cost = self.material_cost
         # self.register_data.proceeds = self.sales
         
-        self.register_data.work_date = "2023/6/7"
-        self.register_data.company_name = "株式会社ラグレス"
-        self.register_data.work_place = "福岡市東区松島１丁目"
-        self.register_data.work_contents = "専用回路増設工事"
-        self.register_data.worker_num = 1
+        self.register_data.work_date = "2023/6/8"
+        self.register_data.company_name = "株式会社新栄輸送"
+        self.register_data.work_place = "石城町"
+        self.register_data.work_contents = "配管工事"
+        self.register_data.worker_num = 3
         self.register_data.worker_cost = 15000
-        self.register_data.material_cost = 2500
-        self.register_data.proceeds = 55000
+        self.register_data.material_cost = 5000
+        self.register_data.proceeds = 85000
         
-        s = self.ctl.register(self.ctl,req=self.register_data)
+        s = self.ctl.register(self.register_data)
         print(s)
     
     def get_data(self):
-        return
+        self.ctl = ctl.AppDataControl()
+        self.fetch = ctl.DataFetchReq()
+        self.fetch.id = -1
+        self.fetch.company_name = "株式会社新栄輸送"
+        print(self.ctl.fetch(self.fetch))
+        data_list = self.ctl.fetch(self.fetch)
+        
+        # name_list = []
+        # for v in data_list:
+        #     name_list.append(v.company_name)
+        #     for v in name_list:
+        #        name_list[]
+        
+        
+        # for i, v in enumerate(data_list):
+        #     # print(i,v.company_name)
+        #     # if v.company_name == name_list[i]:
+        #     #     continue
+        #     if len(name_list[1]) != v.company_name or name_list == []:
+        #         name_list.append(v.company_name)
+        # print(name_list[5],len(name_list),len(data_list))
+        # print(name_list)
+        
+    def get_company_name(self) -> list[str]:
+        self.ctl = ctl.AppDataControl()
+        self.fetch = ctl.DataFetchReq()
+        self.fetch.id = -1
+        data_list = self.ctl.fetch(self.fetch)
+        name_list = []
+
+        for data in data_list:
+            if data.company_name in name_list:
+                continue
+            for _data in data_list:
+                if not data.company_name == _data.company_name:
+                    name_list.append(data.company_name)
+                    break    
+        return name_list
             
 if __name__ == "__main__":
     Window()

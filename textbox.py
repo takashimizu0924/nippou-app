@@ -58,7 +58,7 @@ class WorkDate(TextBox):
     
 
 class Company(TextBox):
-    def __init__(self, frame, box_width=0,values="") -> None:
+    def __init__(self, frame, box_width=0,values=[]) -> None:
         s = ttk.Style()
         s.theme_use('default')
         s.configure('Combo.TCombobox',fieldbackground="lightgrey")
