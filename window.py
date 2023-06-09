@@ -182,27 +182,17 @@ class Window():
         material_cost -> material_cost
         sales -> sales
         """
-        
         self.ctl = ctl.AppDataControl()
         self.register_data = ctl.DataRegistReq()
-        # self.register_data.work_date = self.work_date
-        # self.register_data.company_name = self.company_name
-        # self.register_data.work_place = self.work_place
-        # self.register_data.work_contents = self.work_detail
-        # self.register_data.worker_num = self.worker
-        # self.register_data.worker_cost = self.worker_cost
-        # self.register_data.material_cost = self.material_cost
-        # self.register_data.proceeds = self.sales
-        
-        self.register_data.work_date = "2023/6/8"
-        self.register_data.company_name = "株式会社新栄輸送"
-        self.register_data.work_place = "石城町"
-        self.register_data.work_contents = "配管工事"
-        self.register_data.worker_num = 3
-        self.register_data.worker_cost = 15000
-        self.register_data.material_cost = 5000
-        self.register_data.proceeds = 85000
-        
+        self.register_data.work_date = self.work_date.get_input_text()
+        self.register_data.company_name = self.company.get_input_text()
+        self.register_data.work_place = self.work_place.get_input_text()
+        self.register_data.work_contents = self.work_detail.get_input_text()
+        self.register_data.worker_num = self.worker.get_input_text()
+        self.register_data.worker_cost = self.worker_cost.get_input_text()
+        self.register_data.material_cost = self.material_cost.get_input_text()
+        self.register_data.proceeds = self.sales.get_input_text()
+
         s = self.ctl.register(self.register_data)
         print(s)
     
