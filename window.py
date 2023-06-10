@@ -16,6 +16,11 @@ class Window():
         self.input_frame = tk.Frame(self.root)
         self.input_frame.pack()
         self.browse_frame = tk.Frame(self.root)
+        self.canvas = tk.Canvas(self.root,width=900,height=900)
+        self.scroll_frame = tk.Frame(self.canvas)
+        self.scrollbar = tk.Scrollbar(self.canvas,orient="vertical",command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.scrollbar)
+        
         # self.change_frame_input()
         self.input_window()
         self.root.mainloop()
@@ -85,11 +90,11 @@ class Window():
         self.total_sales_label = tk.Label(self.browse_frame,text="X月合計売上",font=('meiryo',10))
         self.show_total_sales = tk.Label(self.browse_frame,text="¥"+self.total_cost,relief="sunken",anchor=tk.E,width=35)
         
-        self.date_label = tk.Label(self.browse_frame,text="日付",font=('meiryo',10),borderwidth=2,relief="ridge")
-        self.work_place_label = tk.Label(self.browse_frame,text="現場名",font=('meiryo',10),borderwidth=2,relief="ridge",padx=10,width=60)
+        self.date_label = tk.Label(self.browse_frame,text="日付",font=('meiryo',10),borderwidth=2,relief="ridge",width=9)
+        self.work_place_label = tk.Label(self.browse_frame,text="現場名",font=('meiryo',10),borderwidth=2,relief="ridge",padx=10,width=50)
         self.worker_label = tk.Label(self.browse_frame,text="作業員数",font=('meiryo',10),borderwidth=2,relief="ridge",width=8)
-        self.cost_label = tk.Label(self.browse_frame,text="経費",font=('meiryo',10),borderwidth=2,relief="ridge")
-        self.sales_label = tk.Label(self.browse_frame,text="売上",font=('meiryo',10),borderwidth=2,relief="ridge")
+        self.cost_label = tk.Label(self.browse_frame,text="経費",font=('meiryo',10),borderwidth=2,relief="ridge",width=15)
+        self.sales_label = tk.Label(self.browse_frame,text="売上",font=('meiryo',10),borderwidth=2,relief="ridge",width=15)
         
        
         # self.change_page_button.pack(side='top',anchor=tk.E)
@@ -122,34 +127,51 @@ class Window():
         self.work_place_label.grid(row=5,column=1,columnspan=2,sticky=tk.W+tk.E)
         self.worker_label.grid(row=5,column=2,sticky=tk.E)
         self.cost_label.grid(row=5,column=3,sticky=tk.W+tk.E)
-        self.sales_label.grid(row=5,column=4,sticky=tk.W+tk.E)
+        self.sales_label.grid(row=5,column=4,sticky=tk.W+tk.E,padx=[0,5])
         
-        self.get_date_label = tk.Label(self.browse_frame,text="2023/6/7",font=('meiryo',10),borderwidth=2,relief="ridge")
-        self.get_work_place_label = tk.Label(self.browse_frame,text="下大利",font=('meiryo',10),borderwidth=2,relief="ridge",anchor=tk.W,padx=10)
-        self.get_worker_label = tk.Label(self.browse_frame,text="0",font=('meiryo',10),borderwidth=2,relief="ridge",width=8,anchor=tk.E)
-        self.get_cost_label = tk.Label(self.browse_frame,text="2534",font=('meiryo',10),borderwidth=2,relief="ridge",width=15,anchor=tk.E)
-        self.get_sales_label = tk.Label(self.browse_frame,text="55000",font=('meiryo',10),borderwidth=2,relief="ridge",width=15,anchor=tk.E)
-        self.delete_button = tk.Button(self.browse_frame,text="削除",command=self.get_data)
-        self.update_button = tk.Button(self.browse_frame,text="変更")
+        for i in range(20):
+            
+            self.get_date_label = tk.Label(self.scroll_frame,text="2023/6/7",font=('meiryo',10),borderwidth=2,relief="ridge",width=9)
+            self.get_work_place_label = tk.Label(self.scroll_frame,text="下大利",font=('meiryo',10),borderwidth=2,relief="ridge",anchor=tk.W,padx=10,width=41)
+            self.get_worker_label = tk.Label(self.scroll_frame,text=i,font=('meiryo',10),borderwidth=2,relief="ridge",width=8,anchor=tk.E)
+            self.get_cost_label = tk.Label(self.scroll_frame,text="2534",font=('meiryo',10),borderwidth=2,relief="ridge",width=15,anchor=tk.E)
+            self.get_sales_label = tk.Label(self.scroll_frame,text="55000",font=('meiryo',10),borderwidth=2,relief="ridge",width=15,anchor=tk.E)
+            self.delete_button = tk.Button(self.scroll_frame,text="削除",command=self.get_data)
+            self.update_button = tk.Button(self.scroll_frame,text="変更")
         
-        self.get_date_label.grid(row=6,column=0,columnspan=1,sticky=tk.W+tk.E)
-        self.get_work_place_label.grid(row=6,column=1,columnspan=2,sticky=tk.W+tk.E)
-        self.get_worker_label.grid(row=6,column=2,sticky=tk.E)
-        self.get_cost_label.grid(row=6,column=3,sticky=tk.W+tk.E)
-        self.get_sales_label.grid(row=6,column=4,sticky=tk.W+tk.E)
-        self.delete_button.grid(row=6,column=5)
-        self.update_button.grid(row=6,column=6)
+        # self.get_date_label.grid(row=6,column=0,columnspan=1,sticky=tk.W+tk.E)
+        # self.get_work_place_label.grid(row=6,column=1,columnspan=2,sticky=tk.W+tk.E)
+        # self.get_worker_label.grid(row=6,column=2,sticky=tk.E)
+        # self.get_cost_label.grid(row=6,column=3,sticky=tk.W+tk.E)
+        # self.get_sales_label.grid(row=6,column=4,sticky=tk.W+tk.E)
+        # self.delete_button.grid(row=6,column=5)
+        # self.update_button.grid(row=6,column=6)
+            self.get_date_label.grid(row=i,column=0,columnspan=1,sticky=tk.W+tk.E)
+            self.get_work_place_label.grid(row=i,column=1,sticky=tk.W+tk.E)
+            self.get_worker_label.grid(row=i,column=2)
+            self.get_cost_label.grid(row=i,column=3)
+            self.get_sales_label.grid(row=i,column=4)
+            self.delete_button.grid(row=i,column=5,padx=[5,2])
+            self.update_button.grid(row=i,column=6,padx=[2,5])
         
         
     
     def change_frame_input(self):
         self.browse_frame.pack_forget()
+        self.canvas.pack_forget()
+        self.scrollbar.pack_forget()
+        self.scroll_frame.pack_forget()
         self.input_frame.pack()
         self.input_window()
         
     def change_frame_browse(self):
         self.input_frame.pack_forget()
         self.browse_frame.pack()
+        self.canvas.pack(fill="both")
+        self.scrollbar.pack(side="right",fill="y")
+        self.canvas.create_window((0,0),window=self.scroll_frame,anchor="ne")
+        self.scroll_frame.pack(padx=[10,0])
+        
         self.browse_window()
         
     def change_frame(self, now_frame,next_frame):
