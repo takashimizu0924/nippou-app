@@ -273,17 +273,12 @@ class Window():
         name_list = []
 
         for data in data_list:
+            # 名前リストに該当する名前が存在する場合は追加しない
             if data.company_name in name_list:
                 continue
-      
-            for _data in data_list:
-                if not data.company_name == _data.company_name:
-                    name_list.append(data.company_name)
-                    break
-                
-                if len(name_list) <= 0:
-                    name_list.append(data.company_name)
-                    continue
+
+            # 名前リストに会社名を追加する
+            name_list.append(data.company_name)
         
         print(f'get_company_name:\n\
             name_list = {name_list}\
