@@ -1,0 +1,7 @@
+# Python関連
+__pycache__
+*.pyc
+
+# アプリケーション関連
+nippo_app
+*.db
