@@ -214,6 +214,17 @@ class Window():
         self.register_data.worker_cost = self.worker_cost.get_input_text()
         self.register_data.material_cost = self.material_cost.get_input_text()
         self.register_data.proceeds = self.sales.get_input_text()
+        
+        print(f'add_data: execute:\n\
+            work_date = {self.register_data.work_date}\n\
+            company_name = {self.register_data.company_name}\n\
+            work_place = {self.register_data.work_place}\n\
+            work_contents = {self.register_data.work_contents}\n\
+            worker_num = {self.register_data.worker_num}\n\
+            worker_cost = {self.register_data.worker_cost}\n\
+            material_cost = {self.register_data.material_cost}\n\
+            proceeds = {self.register_data.proceeds}\n\
+        ')
 
         s = self.ctl.register(self.register_data)
         print(s)
@@ -264,10 +275,19 @@ class Window():
         for data in data_list:
             if data.company_name in name_list:
                 continue
+      
             for _data in data_list:
                 if not data.company_name == _data.company_name:
                     name_list.append(data.company_name)
-                    break    
+                    break
+                
+                if len(name_list) <= 0:
+                    name_list.append(data.company_name)
+                    continue
+        
+        print(f'get_company_name:\n\
+            name_list = {name_list}\
+        ')  
         return name_list
             
 if __name__ == "__main__":
