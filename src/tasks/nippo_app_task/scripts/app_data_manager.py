@@ -3,12 +3,12 @@
 
 # アノテーション用パッケージ
 from __future__ import annotations
-from typing import (List, Tuple, Dict, Optional, Union)
-
+from typing import (List, Dict, Union)
 # データベース制御パッケージ
-from database_ctrl import (TableDataType, DatabaseRetCode, DatabaseControl)
+from database_ctrl import (TableDataType, DatabaseRetCode, Database)
 
-class AppDataControl:
+
+class DataManager:
     """アプリケーションデータ制御クラス
         NOTE: アプリ特有のデータをデータベースと連携する機能を提供する
     """
@@ -18,7 +18,7 @@ class AppDataControl:
         """
         # データベース作成 (※NOTE:既にDBが存在する場合は接続)
         _database_name: str = "nippo_app"
-        self._db_ctrl = DatabaseControl(_database_name)
+        self._db_ctrl = Database(_database_name)
 
         # テーブル名を生成＆アプリ設定情報インスタンス生成
         self.db_table_name: str = "nippo"

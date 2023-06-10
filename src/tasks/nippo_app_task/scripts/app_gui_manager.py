@@ -1,10 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import tkinter as tk
 import textbox as tb
 
 import database_ctrl
 import app_data_control as ctl
 
-class Window():
+class GuiManager():
     
     def __init__(self) -> None:
         self.root = tk.Tk()
@@ -249,4 +251,4 @@ class Window():
         return name_list
             
 if __name__ == "__main__":
-    Window()
+    GuiManager()
