@@ -29,17 +29,24 @@ class Window():
         # メインウィンドウ作成
         self.__create_root(self._WINDOW_TITLE, self._WINDOW_WIDTH, self._WINDOW_HEIGHT)
 
-        self.input_frame = Frame(self.root)
-        self.input_frame.pack()
-        self.browse_frame = Frame(self.root)
-        self.browse_frame.update_idletasks()
-        self.canvas = Canvas(self.root,width=900,height=300,scrollregion=(-50, -50, 500, 500))
-        self.scroll_frame = Frame(self.canvas)
-        self.scrollbar = Scrollbar(self.canvas,orient="vertical",command=self.canvas.yview)
-        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        ### 日報入力画面 ###
+        # 全体で利用する変数定義
+        self.input_frame: Frame = None
+
+        ### 日報閲覧画面 ###
+        # 設定情報提議
+        self._WG_BROWSE_CANVAS_WIDTH: int = 950
+        self._WG_BROWSE_CANVAS_HEIGHT: int = 250
+        self._SCRL_REGION_WEST: int = 0
+        self._SCRL_REGION_NORTH: int = 0
+        self._SCRL_REGION_EAST: int = 500
+        self._SCRL_REGION_SOUTH: int = 500
+        # 全体で利用する変数定義
+        self.browse_frame: Frame = None
+        self.scroll_frame: Frame = None
         
-        # self.change_frame_input()
-        self.input_window()
+        # アプリ起動時の初期ページを作成
+        self.create_input_page()
 
     def __create_root(self, title_text: str, width: int, height: int, resizeable_width: bool=True,resizeable_height: bool=True) -> None:
         """Tkinterウィンドウ作成
@@ -57,9 +64,44 @@ class Window():
         self.root.geometry(f"{width}x{height}")
         self.root.resizable(width=resizeable_width,height=resizeable_height)
         return
+
+    def __create_input_window_widgets(self) -> None:
+        """日報入力画面のウィジェット作成
+            NOTE: フレーム、ボタン、ラベルなどのウィジェットを作成する
+        """
+        self.input_frame = Frame(self.root)
+        self.input_frame.pack()
+        return
+
+    def __create_browse_window_widgets(self) -> None:
+        """日報入力画面のウィジェット作成
+            NOTE: フレーム、ボタン、ラベルなどのウィジェットを作成する
+        """
+        self.browse_frame = Frame(self.root)
+        self.browse_frame.pack(padx=[10,0])
+        _parent_canvas_frame = Frame(self.browse_frame)
+        _parent_canvas_frame.update_idletasks()
+        _parent_canvas_frame.grid(row=6,column=0,columnspan=5,sticky='w',pady=[20,10])
+        _canvas = Canvas(
+            _parent_canvas_frame, 
+            width=self._WG_BROWSE_CANVAS_WIDTH,
+            height=self._WG_BROWSE_CANVAS_HEIGHT,
+            scrollregion=(self._SCRL_REGION_WEST, self._SCRL_REGION_NORTH, self._SCRL_REGION_EAST, self._SCRL_REGION_SOUTH)
+        )
+        _scrollbar = Scrollbar(_parent_canvas_frame,orient="vertical", command=_canvas.yview)
+        self.scroll_frame = Frame(_canvas)
+        _canvas.configure(yscrollcommand=_scrollbar.set)
+        self.scroll_frame.pack(padx=[5,0])
+        _scrollbar.pack(side="right", fill="y", padx=[10,0])
+        _canvas.pack(side="left", fill="both", padx=[0,0])
+        _canvas.create_window((0,0),window=self.scroll_frame,anchor="nw")
+        return
         
         
-    def input_window(self):
+    def create_input_page(self) -> None:
+        # ウィジェット作成
+        self.__create_input_window_widgets()
+
         self.change_page_button = Button(self.input_frame,text='日報閲覧',command=self.change_frame_browse,font=('meiryo',8),width=8)
         self.input_title = Label(self.input_frame,text='日報入力',font=('meiryo',15))
         self.work_date = WorkDate(self.input_frame)
@@ -72,7 +114,7 @@ class Window():
         self.material_cost = MaterialCost(self.input_frame)
         self.sales = Sales(self.input_frame)
         
-        self.change_page_button.grid(row=0,column=4,pady=(20,0))
+        self.change_page_button.grid(row=0,column=4,pady=(0,0))
         self.input_title.grid(row=1,column=0,columnspan=4,pady=[30,30])
         self.work_date.label.grid(row=2,column=0,pady=20)
         self.work_date._textbox.grid(row=2,column=1,pady=20)
@@ -92,8 +134,9 @@ class Window():
         self.sales._textbox.grid(row=6,column=3,pady=20)
         button = Button(self.input_frame,text='登録',command=self.add_data,font=('meiryo',15),width=15)
         button.grid(row=7,column=0,columnspan=4,pady=[30,0])
+        return
 
-    def browse_window(self):
+    def create_browse_page(self) -> None:
         """データベースからの任意の情報を取得し、表示させる
         
             会社名 : company_name
@@ -106,6 +149,9 @@ class Window():
             売上 : sales
             
         """
+        # ウィジェット作成
+        self.__create_browse_window_widgets()
+
         self.company_name = ""
         self.total_cost = "0"
         self.total_sales = "0"
@@ -115,7 +161,7 @@ class Window():
         self.worker = "0"
         self.cost = 1235
         self.sales = 55555
-        self.change_page_button = Button(self.browse_frame,text='日報入力',command=self.change_frame_input,font=('meiryo',8),width=8)
+        _change_page_button = Button(self.browse_frame,text='日報入力',command=self.change_frame_input,font=('meiryo',8),width=8)
         self.browes_title = Label(self.browse_frame,text='日報閲覧',font=('meiryo',15))
         values = self.get_company_name()
         self.company = Company(self.browse_frame,values=values)
@@ -130,25 +176,7 @@ class Window():
         self.cost_label = Label(self.browse_frame,text="経費",font=('meiryo',10),borderwidth=2,relief="ridge",width=15)
         self.sales_label = Label(self.browse_frame,text="売上",font=('meiryo',10),borderwidth=2,relief="ridge",width=15)
         
-       
-        # self.change_page_button.pack(side='top',anchor='e')
-        # # self.change_page_button.place(x=700,y=50)
-        # self.browes_title.pack()
-        # self.company.label.pack(side='top',anchor=W)
-        # self.company._conbobox.pack(side='top',anchor=W)
-        # self.total_cost_label.pack()
-        # self.show_total_cost.pack()
-        # self.total_sales_label.pack()
-        # self.show_total_sales.pack()
-        
-        # self.date_label.pack()
-        # self.work_place_label.pack()
-        # self.worker_label.pack()
-        # self.cost_label.pack()
-        # self.sales_label.pack()
-        
-        self.change_page_button.grid(row=0,column=5,sticky='e',pady=[20,10])
-        # self.change_page_button.place(x=700,y=50)
+        _change_page_button.grid(row=0,column=5,sticky='e',pady=[20,10])
         self.browes_title.grid(row=1,column=1,columnspan=4,pady=[30,30],padx=[10,20])
         self.company.label.grid(row=2,column=0,pady=[20,10])
         self.company._conbobox.grid(row=2,column=1,sticky='w',padx=[30,0],pady=[20,10])
@@ -172,14 +200,7 @@ class Window():
             self.get_sales_label = Label(self.scroll_frame,text="55000",font=('meiryo',10),borderwidth=2,relief="ridge",width=15,anchor='e')
             self.delete_button = Button(self.scroll_frame,text="削除",command=self.get_data)
             self.update_button = Button(self.scroll_frame,text="変更")
-        
-        # self.get_date_label.grid(row=6,column=0,columnspan=1,sticky='we')
-        # self.get_work_place_label.grid(row=6,column=1,columnspan=2,sticky='we')
-        # self.get_worker_label.grid(row=6,column=2,sticky='e')
-        # self.get_cost_label.grid(row=6,column=3,sticky='we')
-        # self.get_sales_label.grid(row=6,column=4,sticky='we')
-        # self.delete_button.grid(row=6,column=5)
-        # self.update_button.grid(row=6,column=6)
+
             self.get_date_label.grid(row=i,column=0,columnspan=1,sticky='we')
             self.get_work_place_label.grid(row=i,column=1,sticky='we')
             self.get_worker_label.grid(row=i,column=2)
@@ -187,33 +208,26 @@ class Window():
             self.get_sales_label.grid(row=i,column=4)
             self.delete_button.grid(row=i,column=5,padx=[5,2])
             self.update_button.grid(row=i,column=6,padx=[2,5])
-        
-        
-    
-    def change_frame_input(self):
+
+        return
+
+    def change_frame_input(self) -> None:
         self.browse_frame.pack_forget()
-        self.canvas.pack_forget()
-        self.scrollbar.pack_forget()
-        self.scroll_frame.pack_forget()
-        self.input_frame.pack()
-        self.input_window()
+        self.create_input_page()
+        return
         
-    def change_frame_browse(self):
+    def change_frame_browse(self) -> None:
         self.input_frame.pack_forget()
-        self.browse_frame.pack()
-        self.canvas.pack(fill="both")
-        self.scrollbar.pack(side="right",fill="y")
-        self.canvas.create_window((0,0),window=self.scroll_frame,anchor="ne")
-        self.scroll_frame.pack(padx=[10,0])
-        
-        self.browse_window()
-        
-    def change_frame(self, now_frame,next_frame):
+        self.create_browse_page()
+        return
+
+    def change_frame(self, now_frame,next_frame) -> None:
         self.now_frame = now_frame
         self.next_frame = next_frame
         self.now_frame.pack_forget()
         self.next_frame.pack()
-        
+        return
+
     def get_company(self):
         """登録済みの会社名をデータベースから取得
         """
