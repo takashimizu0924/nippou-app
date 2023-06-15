@@ -240,6 +240,16 @@ class Window():
         self.next_frame.pack()
         return
 
+    def clear_frame_input(self) -> None:
+        """日報入力フレームクリア
+            NOTE: 「登録ボタン」押下後に日報入力画面をクリアしてプルダウンの更新処理を実行
+        """
+        ### 一度日報入力フレームを削除
+        self.input_frame.pack_forget()
+        ### 日報入力フレームを再生成
+        self.create_input_page()
+        return
+
     def get_company(self):
         """登録済みの会社名をデータベースから取得
         """
@@ -282,6 +292,10 @@ class Window():
         s = self.app_data_mng.register(_req)
         print(s)
         self.clear_input_area()
+    
+        ### 登録時は会社名プルダウン情報を更新するため一度日報入力フレームを再生成する
+        self.clear_frame_input()
+        return
     
     def clear_input_area(self):
         self.work_date.delete_input_value()
