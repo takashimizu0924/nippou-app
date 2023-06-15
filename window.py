@@ -63,6 +63,8 @@ class Window():
         self.root.title(title_text)
         self.root.geometry(f"{width}x{height}")
         self.root.resizable(width=resizeable_width,height=resizeable_height)
+        ### 画面終了処理のコールバック登録
+        self.root.protocol("WM_DELETE_WINDOW", self.terminate)
         return
 
     def __create_input_window_widgets(self) -> None:
@@ -268,7 +270,7 @@ class Window():
             proceeds = {_req.proceeds}\n\
         ')
 
-        s = self.app_data_mng.register(self.register_data)
+        s = self.app_data_mng.register(_req)
         print(s)
         self.clear_input_area()
     
@@ -285,9 +287,9 @@ class Window():
     
     def get_data(self):
         _req = DataFetchReq()
-        _req.fetch.id = -1
-        _req.fetch.company_name = "株式会社新栄輸送"
-        print(self.fetch(self.fetch))
+        _req.id = -1
+        _req.company_name = "株式会社新栄輸送"
+        print(self.app_data_mng.fetch(_req))
         data_list = self.app_data_mng.fetch(_req)
         
         # name_list = []
@@ -329,6 +331,16 @@ class Window():
         """メインウィンドウ処理
         """
         self.root.mainloop()
+        return
+
+    def terminate(self) -> None:
+        """画面終了処理
+        """
+        ### 終了処理
+        # データベース切断処理
+        self.app_data_mng.terminate()
+        print('Nippo app is terminate.')
+        self.root.destroy()
         return
             
 if __name__ == "__main__":

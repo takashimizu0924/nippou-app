@@ -290,9 +290,6 @@ class DatabaseControl:
                 _query += f"{column_name} = {_values}"
                 # 複数条件判定用フラグを立てる
                 _is_multiple = True
-
-        # 末尾のカンマは不要なため削除
-        _query = _query.rstrip(',')
         
         # 実行用sqlを生成
         _sql: str = f'SELECT * FROM {table_name}{_query}'
@@ -319,69 +316,3 @@ class DatabaseControl:
         self._conn.close()
         print("データベース切断完了")
         return DatabaseRetCode.SUCCESS
-
-
-if __name__ == "__main__":
-    # テスト用のデータベース作成
-    db_ctrl = DatabaseControl("test_db")
-
-    # テスト用のテーブルとカラムデータと型を生成
-    db_table_name = "test_table7"
-    column_data_dict = {"id":(f"{TableDataType.INT} {TableDataType.PRIMARY_KEY} {TableDataType.AUTO_INC}"),"sample_name":TableDataType.STR}
-    # テーブル作成テスト
-    try:
-        ret = db_ctrl.create_table(db_table_name, column_data_dict)
-        # 戻り値を確認
-        print(f"create_table ret = {ret}")
-    except:
-        pass
-
-    # テーブルデータ挿入テスト
-    column_data_dict = {"sample_name":"テスト太郎"}
-    ret = db_ctrl.insert_record(db_table_name, column_data_dict)
-
-    # テーブル作成テストの結果確認
-    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name, None)
-    # 戻り値を確認
-    print(f"get_record_data_from_dict ret = {ret}")
-    for data in get_data_list:
-        print(f"get_record_data_from_dict key = {data}")
-    
-    # テーブルデータ更新結果確認
-    id_data = 1
-    update_data_dict = {"sample_name":"テスト次郎"}
-    ret = db_ctrl.update_record(db_table_name, id_data, update_data_dict)
-
-    # テーブル作成テストの結果確認
-    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name, None)
-    # 戻り値を確認
-    print(f"get_record_data_from_dict ret = {ret}")
-    for data in get_data_list:
-        print(f"get_record_data_from_dict key = {data}")
-
-    # 削除確認用にデータ挿入1
-    column_data_dict = {"sample_name":"テスト三郎"}
-    ret = db_ctrl.insert_record(db_table_name, column_data_dict)
-
-    # テーブル作成テストの結果確認
-    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name, None)
-    # 戻り値を確認
-    print(f"get_record_data_from_dict ret = {ret}")
-    for data in get_data_list:
-        print(f"get_record_data_from_dict key = {data}")
-    
-    # デーブルデータ削除結果確認
-    id_data = 1
-    # delete_data_dict = {"sample_name":"テスト次郎"}
-    ret = db_ctrl.delete_record(db_table_name, id_data)
-
-    # テーブル作成テストの結果確認
-    get_req_data: dict = {"ID": 5}
-    ret, get_data_list = db_ctrl.get_record_data_from_dict(db_table_name, get_req_data)
-    # 戻り値を確認
-    print(f"get_record_data_from_dict ret = {ret}")
-    for data in get_data_list:
-        print(f"get_record_data_from_dict key = {data}")
-
-    # テスト終了のためデータベース切断
-    db_ctrl.disconnection()
