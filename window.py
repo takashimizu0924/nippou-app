@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# アノテーション用パッケージ
+from __future__ import annotations
+from typing import (List, Tuple, Dict, Optional, Union)
+
 ### Tkinterパッケージ
 from tkinter import (Button, Canvas, Frame, Label, Scrollbar, Tk)
 from textbox import (Title, WorkDate, Company, WorkPlace, WorkDetail, Worker, WorkerCost, MaterialCost, Sales)
@@ -108,8 +112,10 @@ class Window():
         self.change_page_button = Button(self.input_frame,text='日報閲覧',command=self.change_frame_browse,font=('meiryo',8),width=8)
         self.input_title = Label(self.input_frame,text='日報入力',font=('meiryo',15))
         self.work_date = WorkDate(self.input_frame)
-        values = self.get_company_name()
-        self.company = Company(self.input_frame,values=values)
+
+         # 会社名プルダウン作成用に会社名リスト取得
+        _company_name_list = self.get_company_name_list()
+        self.company = Company(self.input_frame,values=_company_name_list)
         self.work_place = WorkPlace(self.input_frame)
         self.work_detail = WorkDetail(self.input_frame,80)
         self.worker = Worker(self.input_frame)
@@ -166,8 +172,10 @@ class Window():
         self.sales = 55555
         self._change_page_button = Button(self.browse_frame,text='日報入力',command=self.change_frame_input,font=('meiryo',8),width=8)
         self.browes_title = Label(self.browse_frame,text='日報閲覧',font=('meiryo',15))
-        values = self.get_company_name()
-        self.company = Company(self.browse_frame,values=values)
+
+        # 会社名プルダウン作成用に会社名リスト取得
+        _company_name_list = self.get_company_name_list()
+        self.company = Company(self.browse_frame,values=_company_name_list)
         self.total_cost_label = Label(self.browse_frame,text="X月合計経費",font=('meiryo',10))
         self.show_total_cost = Label(self.browse_frame,text="¥"+self.total_cost,relief="sunken",anchor='e',width=35)
         self.total_sales_label = Label(self.browse_frame,text="X月合計売上",font=('meiryo',10))
@@ -195,15 +203,16 @@ class Window():
         self.sales_label.grid(row=5,column=4,sticky='we',padx=[0,5])
         
         for i in range(20):
-            
+            ### ウィジェット作成
             self.get_date_label = Label(self.scroll_frame,text="2023/6/7",font=('meiryo',10),borderwidth=2,relief="ridge",width=9)
             self.get_work_place_label = Label(self.scroll_frame,text="下大利",font=('meiryo',10),borderwidth=2,relief="ridge",anchor='w',padx=10,width=41)
             self.get_worker_label = Label(self.scroll_frame,text=i,font=('meiryo',10),borderwidth=2,relief="ridge",width=8,anchor='e')
             self.get_cost_label = Label(self.scroll_frame,text="2534",font=('meiryo',10),borderwidth=2,relief="ridge",width=15,anchor='e')
             self.get_sales_label = Label(self.scroll_frame,text="55000",font=('meiryo',10),borderwidth=2,relief="ridge",width=15,anchor='e')
-            self.delete_button = Button(self.scroll_frame,text="削除",command=self.get_data)
+            self.delete_button = Button(self.scroll_frame,text="削除",command=self.get_registered_data)
             self.update_button = Button(self.scroll_frame,text="変更")
 
+            ### ウィジェット配置
             self.get_date_label.grid(row=i,column=0,columnspan=1,sticky='we')
             self.get_work_place_label.grid(row=i,column=1,sticky='we')
             self.get_worker_label.grid(row=i,column=2)
@@ -285,51 +294,63 @@ class Window():
         self.material_cost.delete_input_value()
         self.sales.delete_input_value()
     
-    def get_data(self):
-        _req = DataFetchReq()
-        _req.id = -1
-        _req.company_name = "株式会社新栄輸送"
-        print(self.app_data_mng.fetch(_req))
-        data_list = self.app_data_mng.fetch(_req)
-        
-        # name_list = []
-        # for v in data_list:
-        #     name_list.append(v.company_name)
-        #     for v in name_list:
-        #        name_list[]
-        
-        
-        # for i, v in enumerate(data_list):
-        #     # print(i,v.company_name)
-        #     # if v.company_name == name_list[i]:
-        #     #     continue
-        #     if len(name_list[1]) != v.company_name or name_list == []:
-        #         name_list.append(v.company_name)
-        # print(name_list[5],len(name_list),len(data_list))
-        # print(name_list)
-        
-    def get_company_name(self) -> list[str]:
-        _req = DataFetchReq()
-        _req.id = -1
-        data_list = self.app_data_mng.fetch(_req)
-        name_list = []
+    def get_registered_data(self, target_company_name: str = "", id: int = 0) -> List[DataFetchRsp]:
+        """登録データ取得
+            NOTE:全データを取得する場合は「取得対象の会社名」「取得対象のID」を指定せず本メソッドをコールする
 
-        for data in data_list:
+        Args:
+            target_company_name (str, optional): 取得対象の会社名. Defaults to "".
+            id (int, optional): 取得対象のID. Defaults to 0.
+
+        Returns:
+            List[DataFetchRsp]: _description_
+        """
+        ### 要求生成
+        _req: DataFetchReq = DataFetchReq()
+        _req.id = id
+        _req.company_name = target_company_name
+        
+        ### 応答生成
+        _rsp_list: List[DataFetchRsp] = self.app_data_mng.fetch(_req)
+        
+        # 応答データ内容表示　NOTE:デバッグ用
+        print(f'get_registered_data: responce data = {_rsp_list}')
+        return _rsp_list
+        
+    def get_company_name_list(self) -> list[str]:
+        """会社名リスト取得
+
+        Returns:
+            list[str]: 会社名リスト
+        """
+        ### 要求生成
+        _req = DataFetchReq()
+        _req.id = -1
+        ### 要求実行
+        registered_data_list: List[DataFetchRsp] = self.get_registered_data()
+
+        # 取得データ表示 NOTE: デバッグ用
+        print(f'get_company_name_list:\n\
+                list length = {len(registered_data_list)}\n\
+                registered data list = {registered_data_list}\
+        ')
+
+        ### 応答生成
+        _rsp_list: list[str] = []
+        for registered_data in registered_data_list:
             # 名前リストに該当する名前が存在する場合は追加しない
-            if data.company_name in name_list:
+            if registered_data.company_name in _rsp_list:
                 continue
 
             # 名前リストに会社名を追加する
-            name_list.append(data.company_name)
-        
-        print(f'get_company_name:\n\
-            name_list = {name_list}\
-        ')  
-        return name_list
+            _rsp_list.append(registered_data.company_name)
+
+        return _rsp_list
 
     def cyle(self) -> None:
         """メインウィンドウ処理
         """
+        ### メインウィンドウループ処理開始
         self.root.mainloop()
         return
 
@@ -340,6 +361,8 @@ class Window():
         # データベース切断処理
         self.app_data_mng.terminate()
         print('Nippo app is terminate.')
+
+        # メインウィンドウ削除
         self.root.destroy()
         return
             

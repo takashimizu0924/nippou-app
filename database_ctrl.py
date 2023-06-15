@@ -221,7 +221,6 @@ class DatabaseControl:
         Returns:
             int: データベースリターンコード
         """
-
         # 引数チェック
         if table_name == "":
             print("指定されたテーブル名が空のためエラー")

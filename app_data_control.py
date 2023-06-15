@@ -159,14 +159,10 @@ class AppDataControl:
         ## 要求辞書データ作成
         _req: dict = {}
         if 0 < req.id:
-            _req = {
-                "ID": req.id,
-                "COMPANY_NAME": req.company_name
-            }
-        elif req.id == 0:
-            _req = {
-                "COMPANY_NAME": req.company_name
-            }
+            _req["ID"] = req.id
+
+        if not req.company_name == "":
+            _req["COMPANY_NAME"] = req.company_name
 
         ## データ登録実行
         ret_code, ret_data = self._db_ctrl.get_record_data_from_dict(self.db_table_name, _req)
