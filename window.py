@@ -76,9 +76,10 @@ class Window():
     def __create_browse_window_widgets(self) -> None:
         """日報入力画面のウィジェット作成
             NOTE: フレーム、ボタン、ラベルなどのウィジェットを作成する
+                  ※pack()メソッドを呼び出すタイミングにも注意を払う必要がある
         """
         self.browse_frame = Frame(self.root)
-        self.browse_frame.pack(padx=[10,0])
+        self.browse_frame.pack(side="top")
         _parent_canvas_frame = Frame(self.browse_frame)
         _parent_canvas_frame.update_idletasks()
         _parent_canvas_frame.grid(row=6,column=0,columnspan=5,sticky='w',pady=[20,10])
@@ -114,8 +115,8 @@ class Window():
         self.material_cost = MaterialCost(self.input_frame)
         self.sales = Sales(self.input_frame)
         
-        self.change_page_button.grid(row=0,column=4,pady=(0,0))
-        self.input_title.grid(row=1,column=0,columnspan=4,pady=[30,30])
+        self.change_page_button.grid(row=1,column=4)
+        self.input_title.grid(row=1,column=1,columnspan=4,pady=[30,30],padx=[10,20])
         self.work_date.label.grid(row=2,column=0,pady=20)
         self.work_date._textbox.grid(row=2,column=1,pady=20)
         self.company.label.grid(row=3,column=0,pady=20)
@@ -161,7 +162,7 @@ class Window():
         self.worker = "0"
         self.cost = 1235
         self.sales = 55555
-        _change_page_button = Button(self.browse_frame,text='日報入力',command=self.change_frame_input,font=('meiryo',8),width=8)
+        self._change_page_button = Button(self.browse_frame,text='日報入力',command=self.change_frame_input,font=('meiryo',8),width=8)
         self.browes_title = Label(self.browse_frame,text='日報閲覧',font=('meiryo',15))
         values = self.get_company_name()
         self.company = Company(self.browse_frame,values=values)
@@ -176,7 +177,7 @@ class Window():
         self.cost_label = Label(self.browse_frame,text="経費",font=('meiryo',10),borderwidth=2,relief="ridge",width=15)
         self.sales_label = Label(self.browse_frame,text="売上",font=('meiryo',10),borderwidth=2,relief="ridge",width=15)
         
-        _change_page_button.grid(row=0,column=5,sticky='e',pady=[20,10])
+        self._change_page_button.grid(row=1,column=4)
         self.browes_title.grid(row=1,column=1,columnspan=4,pady=[30,30],padx=[10,20])
         self.company.label.grid(row=2,column=0,pady=[20,10])
         self.company._conbobox.grid(row=2,column=1,sticky='w',padx=[30,0],pady=[20,10])
