@@ -8,9 +8,9 @@ def app() -> None:
     """日報管理アプリのエントリーポイント
     """
     FileManager()
-    print('Test1')
+    print('Test2')
 
 ### アプリケーション実行(GUI起動)
-if __name__ == '__manin__':
+if __name__ == '__main__':
+    print('Test1')
     app()
-    print('Test2')
