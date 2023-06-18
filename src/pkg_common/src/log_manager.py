@@ -18,38 +18,47 @@ class LogLevel:
 class LogControl:
     """ログデータ制御クラス
     """
-    def __init__(self, save_file_name: str = '', level = LogLevel.WARNING) -> None:
+    def __init__(self, save_path: str = '', level = LogLevel.DEBUG) -> None:
         """コンストラクタ
+
+        Args:
+            save_path (str, optional): 保存先パス. Defaults to ''.
+            level (_type_, optional): ログレベル. Defaults to LogLevel.WARNING.
         """
         # ログファイル名
-        self._FILE_NAME: str   = "sample.log"
+        self._FILE_NAME: str   = "app.log"
+        self._FILE_PATH: str   = f"/home/natsuki/work/project/nippou-app/log/{self._FILE_NAME}"
         # ロガーの名前設定
-        self.logger = logging.getLogger(__name__)
-        self.__file_handler(save_file_name, level)
-        self.__console_handler(level)
+        self.logger = logging.getLogger("nippou_app")
+        self.logger.setLevel(level)
+        fh = self._file_handler(save_path, level)
+        ch = self._console_handler(level)
+
+        self.logger.addHandler(fh)
+        self.logger.addHandler(ch)
     
-    def __file_handler(self, logfile_name:str, level:LogLevel) -> None:
+    def _file_handler(self, save_path:str, level:LogLevel) -> logging.FileHandler:
         """ファイルハンドラーをロギングインスタンスに設定
 
         Args:
             logfile_name (str): 出力するファイル名
             level (LogLevel): ログレベル
         """
-        _logfile_name = logfile_name
-        if _logfile_name == '':
-           _logfile_name = self._FILE_NAME
+        _logfile_path = save_path
+        if _logfile_path == '':
+           _logfile_path = self._FILE_PATH
 
-        fh = logging.FileHandler(_logfile_name)
+        fh = logging.FileHandler(_logfile_path)
         # ログレベルの設定
-        fh.setLevel(level)
+        # fh.setLevel(level)
         # フォーマッタの定義
-        fh_fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %T%H:%M:%S")
-        fh.setFormatter(fh_fmt)
-        # フォーマッタをハンドラに紐づける
-        self.logger.addHandler(fh)
-        return
+        # fh_fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %T%H:%M:%S")
+        # fh.setFormatter(fh_fmt)
+        # # フォーマッタをハンドラに紐づける
+        # self.logger.addHandler(fh)
+        return fh
     
-    def __console_handler(self, level:LogLevel) -> None:
+    def _console_handler(self, level:LogLevel) -> logging.StreamHandler:
         """コンソールハンドラーをロギングインスタンスに設定
 
         Args:
@@ -58,13 +67,13 @@ class LogControl:
         # コンソールに標準出力設定
         ch = logging.StreamHandler()
         # ログレベルの設定
-        ch.setLevel(level)
+        # ch.setLevel(level)
         # フォーマッタの定義
-        ch_fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %T%H:%M:%S")
-        ch.setFormatter(ch_fmt)
-        # フォーマッタをハンドラに紐づける
-        self.logger.addHandler(ch)
-        return
+        # ch_fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %T%H:%M:%S")
+        # ch.setFormatter(ch_fmt)
+        # # フォーマッタをハンドラに紐づける
+        # self.logger.addHandler(ch)
+        return ch
     
     def debug(self, text: str) -> None:
         """debugレベルのログ出力
@@ -112,9 +121,9 @@ class LogControl:
         return
 
 
-if __name__ == '__main__':
-    # お試しの場合はここに追加
-    log_ctrl = LogControl()
+# if __name__ == '__main__':
+#     # お試しの場合はここに追加
+#     log_ctrl = LogControl()
 
-    #log出力のテスト
-    log_ctrl.debug("this is test3")
+#     #log出力のテスト
+#     log_ctrl.debug("this is test3")
