@@ -27,7 +27,7 @@ class LogControl:
         """
         # ログファイル名
         self._FILE_NAME: str   = "app.log"
-        self._FILE_PATH: str   = f"/home/natsuki/work/project/nippou-app/log/{self._FILE_NAME}"
+        self._FILE_PATH: str   = f"{self._FILE_NAME}"
         # ロガーの名前設定
         self.logger = logging.getLogger("nippou_app")
         self.logger.setLevel(level)
@@ -50,12 +50,12 @@ class LogControl:
 
         fh = logging.FileHandler(_logfile_path)
         # ログレベルの設定
-        # fh.setLevel(level)
+        fh.setLevel(level)
         # フォーマッタの定義
-        # fh_fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %T%H:%M:%S")
-        # fh.setFormatter(fh_fmt)
+        fh_fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %T%H:%M:%S")
+        fh.setFormatter(fh_fmt)
         # # フォーマッタをハンドラに紐づける
-        # self.logger.addHandler(fh)
+        self.logger.addHandler(fh)
         return fh
     
     def _console_handler(self, level:LogLevel) -> logging.StreamHandler:
@@ -67,12 +67,12 @@ class LogControl:
         # コンソールに標準出力設定
         ch = logging.StreamHandler()
         # ログレベルの設定
-        # ch.setLevel(level)
+        ch.setLevel(level)
         # フォーマッタの定義
-        # ch_fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %T%H:%M:%S")
-        # ch.setFormatter(ch_fmt)
+        ch_fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %T%H:%M:%S")
+        ch.setFormatter(ch_fmt)
         # # フォーマッタをハンドラに紐づける
-        # self.logger.addHandler(ch)
+        self.logger.addHandler(ch)
         return ch
     
     def debug(self, text: str) -> None:

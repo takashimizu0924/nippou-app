@@ -5,7 +5,7 @@
 from __future__ import annotations
 from typing import (List, Dict, Union)
 # データベース制御パッケージ
-from database_ctrl import (TableDataType, DatabaseRetCode, Database)
+from pkg_db.database import (TableDataType, DatabaseRetCode, Database)
 
 
 class DataManager:

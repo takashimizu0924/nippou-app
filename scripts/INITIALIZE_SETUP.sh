@@ -57,7 +57,9 @@ for package in ${PIP_PKG_NAME_LIST[@]}
         if ${IS_NOT_EXISTS}; then
             # パッケージが存在しなければインストール
             pip install ${package}
+            echo ""
             echo "[\e[37;44m----- Installed '${package}' -----\e[m"
+            echo ""
         fi
 
     done
@@ -74,6 +76,7 @@ FILE_NAME=""
 PYTHON_PKG_NAME_LIST[0]="pkg_common"
 PYTHON_PKG_NAME_LIST[1]="pkg_db"
 PYTHON_PKG_NAME_LIST[2]="pkg_window_widgets"
+PYTHON_PKG_NAME_LIST[3]="tasks"
 
 ### Pythonのsetup.pyを呼び出し各パッケージのビルド＆インストール
 for PKG in ${PYTHON_PKG_NAME_LIST[@]}
@@ -90,9 +93,9 @@ for PKG in ${PYTHON_PKG_NAME_LIST[@]}
         ## パッケージのビルド
         python3 setup.py sdist
         if [ $? -eq 0 ]; then
-            echo -e "\e[33;1mCreate ['${PKG}'] is\e[m ${SUCCESS_COMMENT}"
+            echo -e "\e[33;1mBuilding ['${PKG}'] is\e[m ${SUCCESS_COMMENT}"
         else
-            echo -e "\e[31;1mCreate ['${PKG}'] is\e[m ${FAILED_COMMENT}"
+            echo -e "\e[31;1mBuilding ['${PKG}'] is\e[m ${FAILED_COMMENT}"
             echo -e "\e[33;1mPlease check if thre are any errors in the './${PKG}/setup.py' file.\e[m"
             continue
         fi
@@ -114,9 +117,14 @@ for PKG in ${PYTHON_PKG_NAME_LIST[@]}
             continue            
         fi
 
+        ## インストール後のパッケージディレクトリを削除
+        rm -rf ./dist ./${PKG}*
+
         # 次のパッケージのインストール準備
         cd ../
     done
+
+### ビルド＆インストールした
 
 ### 初期化完了 ###
 echo ""
