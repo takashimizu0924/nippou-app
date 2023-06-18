@@ -22,7 +22,6 @@ echo ""
 # スクリプト内で利用するコマンド名配列を定義
 COMMAND_NAME_LIST[0]="python3"
 COMMAND_NAME_LIST[1]="pip3"
-COMMAND_NAME_LIST[2]="ccccccccc"
 
 # コマンドチェック実行
 for command in ${COMMAND_NAME_LIST[@]}
