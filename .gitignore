@@ -1,6 +1,8 @@
 # Python関連
-__pycache__
+*__pycache__
 *.pyc
+*.egg-info
+*dist
 
 # アプリケーション関連
 nippo_app
