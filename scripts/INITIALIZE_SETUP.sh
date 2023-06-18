@@ -21,7 +21,8 @@ echo ""
 ### ビルド前にコマンド存在チェック
 # スクリプト内で利用するコマンド名配列を定義
 COMMAND_NAME_LIST[0]="python3"
-COMMAND_NAME_LIST[2]="pip3"
+COMMAND_NAME_LIST[1]="pip3"
+COMMAND_NAME_LIST[2]="ccccccccc"
 
 # コマンドチェック実行
 for command in ${COMMAND_NAME_LIST[@]}
@@ -31,7 +32,7 @@ for command in ${COMMAND_NAME_LIST[@]}
             echo -e "[\e[33;1mCOMMAND-EXISTS-CHECKING\e[m]:---------->[${OK_COMMENT}]----------'${command}'"
         else
             echo -e "[\e[33;1mCOMMAND-EXISTS-CHECKING\e[m]:---------->[${NG_COMMENT}]----------'${command}'"
-            echo -e "[\e[31;1m'${command} is not found. Please install '${command}' and retry.\e[m"
+            echo -e "\e[31;1m'${command}' command is not found. Please 'sudo apt install ${command}', and retry.\e[m"
             exit -1
         fi
     done
