@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     # パッケージ名
     name = "pkg_common",
     # バージョン番号
     version = "0.1.0",
-    # 現在のディレクトリから自動的にパッケージを検索して返す関数
-    # packages=['src'],
-    # packages=find_packages(),
+    # パッケージ情報作成
     packages=['pkg_common'],
+    # パッケージ対象のディレクトリ指定
     package_dir={'pkg_common':'src'}
 )
