@@ -18,16 +18,17 @@ class LogLevel:
 class LogControl:
     """ログデータ制御クラス
     """
-    def __init__(self, save_path: str = '', level = LogLevel.DEBUG) -> None:
+    def __init__(self, save_path: str, level: LogLevel = LogLevel.DEBUG) -> None:
         """コンストラクタ
 
         Args:
             save_path (str, optional): 保存先パス. Defaults to ''.
-            level (_type_, optional): ログレベル. Defaults to LogLevel.WARNING.
+            level (LogLevel, optional): ログレベル. Defaults to LogLevel.WARNING.
         """
-        # ログファイル名
-        self._FILE_NAME: str   = "app.log"
-        self._FILE_PATH: str   = f"{self._FILE_NAME}"
+        # 引数チェック
+        if save_path == '':
+            raise Exception("Dose not exists save path.")
+
         # ロガーの名前設定
         self.logger = logging.getLogger("nippou_app")
         self.logger.setLevel(level)
@@ -44,11 +45,7 @@ class LogControl:
             logfile_name (str): 出力するファイル名
             level (LogLevel): ログレベル
         """
-        _logfile_path = save_path
-        if _logfile_path == '':
-           _logfile_path = self._FILE_PATH
-
-        fh = logging.FileHandler(_logfile_path)
+        fh = logging.FileHandler(save_path)
         # ログレベルの設定
         fh.setLevel(level)
         # フォーマッタの定義
