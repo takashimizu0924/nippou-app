@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# アノテーションパッケージ用
+from typing import Dict, List, Optional, Tuple, Union
 # ファイルパス存在確認用
 import os
+import json
 
 ### ファイル入出力管理クラス定義 ###
 class FileManager:
@@ -11,11 +14,14 @@ class FileManager:
     def __init__(self) -> None:
         self._ENCODE_TYPE: str = "utf-8"
 
-    def read(self, file_path: str) -> list:
+    def read(self, file_path: str) -> List[str]:
         """ファイル読み込み
 
         Args:
             file_path (str): 読み込むファイル名
+
+        Returns:
+            List[str]: 応答データ
         """
         # 応答データを作成
         _rsp = []
@@ -68,33 +74,32 @@ class FileManager:
 
         return True
 
-# if __name__ == '__main__':
-    # お試しの場合はここに追加
-    # test_path: str = "/home/natsuki/work/project/nippou-app/src/pkg_common/scripts/test.txt"
-    # path = os.getcwd()
-    # print(path)
-    # test_path: str = f"{path}/test.txt"
-    # is_file = os.path.isfile(test_path)
-    # if is_file:
-    #     print("file exists")
-    # else:
-    #     print("does not exists")
+    def json_read(self, json_file_path: str) -> Dict[str,Union[str, int]]:
+        """Jsonファイル読み込み
 
-    # クラスのインスタンス化
-    # file_manager = FileManager()
-    # # 書き込む対象のテキストファイルの絶対パスを作成
-    # path = "/home/natsuki/work/project/nippou-app/data/sample.txt"
-    # # 書き込むデータを作成
-    # data = [
-    #     "1行目に書き込むデータ",
-    #     "2行目に書き込むデータ",
-    #     "3行目に書き込むデータ"
-    # ]
-    # file_manager.read(path)
+        Args:
+            json_file_path (str): 読み込むJsonファイル名
 
-    # # 指定したパスのファイルにデータを書き込む
-    # is_ok = file_manager.write(path, data)
-    # if is_ok:
-    #     print("write success")
-    # else:
-    #     print("write failure")
+        Returns:
+            Dict[str,Union[str, int]]: 応答データ
+        """
+        # 応答データを作成
+        _rsp = {}
+        # ファイル存在確認
+        is_file = os.path.isfile(json_file_path)
+        if not is_file:
+            # ファイルじゃない場合はここでエラーを返す
+            return _rsp
+
+        # 読み込みデータを確認
+        try:
+            with open(json_file_path, "r") as json_file:
+                # splitで指定した改行コードを基準に配列化
+                _rsp = json.load(json_file)
+        
+        # 読み込みを失敗した場合ここに入る
+        except Exception as e:
+            print(f"Error message: {e}")
+            return _rsp
+        
+        return _rsp
