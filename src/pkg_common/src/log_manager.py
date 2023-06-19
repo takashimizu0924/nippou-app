@@ -15,7 +15,7 @@ class LogLevel:
     ERROR: str      = logging.ERROR
     CRITICAL: str   = logging.CRITICAL
 
-class LogControl:
+class LogManager:
     """ログデータ制御クラス
     """
     def __init__(self, save_path: str, level: LogLevel = LogLevel.DEBUG) -> None:
@@ -120,7 +120,7 @@ class LogControl:
 
 # if __name__ == '__main__':
 #     # お試しの場合はここに追加
-#     log_ctrl = LogControl()
+#     log_ctrl = LogManager()
 
 #     #log出力のテスト
 #     log_ctrl.debug("this is test3")
