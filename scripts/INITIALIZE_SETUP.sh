@@ -75,7 +75,7 @@ FILE_NAME=""
 # 追加するパッケージがあれば以下に追加
 PYTHON_PKG_NAME_LIST[0]="pkg_common"
 PYTHON_PKG_NAME_LIST[1]="pkg_db"
-PYTHON_PKG_NAME_LIST[2]="pkg_window_widgets"
+PYTHON_PKG_NAME_LIST[2]="pkg_window"
 PYTHON_PKG_NAME_LIST[3]="tasks"
 
 ### Pythonのsetup.pyを呼び出し各パッケージのビルド＆インストール
