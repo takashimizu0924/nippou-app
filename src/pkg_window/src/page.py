@@ -19,6 +19,9 @@ class Page:
         """
         self._name_tag: str = page_name_tag
         self._frame_list: List[object] = []
+        log_save_path: str = "app.log"
+        file_path = f'../../../../log/{file_name}'
+        self._log: LogManager = LogManager()
 
     def add_frame(self, frame_list: List[object]):
         """フレームをページに追加

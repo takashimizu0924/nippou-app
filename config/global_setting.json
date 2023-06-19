@@ -1,0 +1,11 @@
+{
+    "LOG":{
+        "-- ログファイル設定情報 --":"",
+
+        "** 注意点-1 **":" ※ 'YOUR_PROJECT_PATH'に設定する値は自身の環境の「nippou-app」プロジェクトディレクトリまでの絶対パスを記述してください ",
+        "YOUR_PROJECT_PATH":"./",
+
+        "SAVE_PATH":"/nippou-app/log",
+        "SAVE_FILE_NAME":"nippou_app.log"
+    }
+}
