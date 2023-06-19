@@ -1,42 +1,141 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import tkinter as tk
-import textbox as tb
 
-import database_ctrl
-import app_data_control as ctl
+# アノテーション用パッケージ
+from __future__ import annotations
+from typing import (List, Tuple, Dict, Optional, Union)
 
-class GuiManager():
-    
+### Tkinterパッケージ
+from tkinter import (Button, Canvas, Frame, Label, Scrollbar, Tk)
+from textbox import (Title, WorkDate, Company, WorkPlace, WorkDetail, Worker, WorkerCost, MaterialCost, Sales)
+### アプリケーションデータ制御モジュール
+from app_data_control import (AppDataControl)
+from app_data_control import (DataDeleteReq, DataFetchReq, DataRegistReq, DataUpdateReq)
+from app_data_control import (DataFetchRsp)
+
+
+class Window():
+    """メインウィンドウクラス
+    """
     def __init__(self) -> None:
-        self.root = tk.Tk()
-        self.width = 1000
-        self.height = 600
-        self.root.geometry(f"{self.width}x{self.height}")
-        self.root.title("日報兼売上管理アプリ")
-        self.root.resizable(width=False,height=False)
-        self.input_frame = tk.Frame(self.root)
+        """コンストラクタ
+        """
+        ### アプリケーションデータマネージャ ###
+        # インスタンス生成
+        self.app_data_mng: AppDataControl = AppDataControl()
+
+        ### Tkinterメインウィンドウ ###
+        # 設定情報定義
+        self._WINDOW_TITLE: str     = "日報兼売上管理アプリ" 
+        self._WINDOW_WIDTH: int     = 1000
+        self._WINDOW_HEIGHT: int    = 600
+        self.root: Tk = None
+        # メインウィンドウ作成
+        self.__create_root(self._WINDOW_TITLE, self._WINDOW_WIDTH, self._WINDOW_HEIGHT)
+
+        ### 日報入力画面 ###
+        # 全体で利用する変数定義
+        self.input_frame: Frame = None
+        
+        ### 画面共通 ###
+        # 全体で利用する変数定義
+        self.combobox_frame: Frame = None
+
+        ### 日報閲覧画面 ###
+        # 設定情報提議
+        self._WG_BROWSE_CANVAS_WIDTH: int = 950
+        self._WG_BROWSE_CANVAS_HEIGHT: int = 250
+        self._SCRL_REGION_WEST: int = 0
+        self._SCRL_REGION_NORTH: int = 0
+        self._SCRL_REGION_EAST: int = 500
+        self._SCRL_REGION_SOUTH: int = 500
+        # 全体で利用する変数定義
+        self.browse_frame: Frame = None
+        self.scroll_frame: Frame = None
+        
+        # アプリ起動時の初期ページを作成
+        self.create_input_page()
+
+    def __create_root(self, title_text: str, width: int, height: int, resizeable_width: bool=True,resizeable_height: bool=True) -> None:
+        """Tkinterウィンドウ作成
+            NOTE: メインウィンドウのタイトル、縦横幅サイズ設定、サイズ変更可否設定を行う
+
+        Args:
+            title_text (str): メインウィンドウのタイトル文字列
+            width (int): メインウィンドウの横幅サイズ
+            height (int): メインウィンドウの縦幅サイズ
+            resizeable_width (bool, optional): 横幅サイズの変更可否(True:変更可/False:変更不可). Defaults to True.
+            resizeable_height (bool, optional): 縦幅サイズの変更可否(True:変更可/False:変更不可). Defaults to True.
+        """
+        self.root = Tk()
+        self.root.title(title_text)
+        self.root.geometry(f"{width}x{height}")
+        self.root.resizable(width=resizeable_width,height=resizeable_height)
+        ### 画面終了処理のコールバック登録
+        self.root.protocol("WM_DELETE_WINDOW", self.terminate)
+        return
+
+    def __create_input_window_widgets(self) -> None:
+        """日報入力画面のウィジェット作成
+            NOTE: フレーム、ボタン、ラベルなどのウィジェットを作成する
+        """
+        self.input_frame = Frame(self.root)
         self.input_frame.pack()
-        self.browse_frame = tk.Frame(self.root)
-        # self.change_frame_input()
-        self.input_window()
-        self.root.mainloop()
+        return
+
+    def __create_common_combobox(self) -> None:
+        """コンボボックスウィジェット用フレーム作成
+            NOTE:コンボボックスウィジェットのみイベント発生時の処理で同じページを利用する
+        """
+        self.combobox_frame = Frame(self.root)
+        return
+
+    def __create_browse_window_widgets(self) -> None:
+        """日報入力画面のウィジェット作成
+            NOTE: フレーム、ボタン、ラベルなどのウィジェットを作成する
+                  ※pack()メソッドを呼び出すタイミングにも注意を払う必要がある
+        """
+        self.browse_frame = Frame(self.root)
+        self.browse_frame.pack(side="top")
+        _parent_canvas_frame = Frame(self.browse_frame)
+        _parent_canvas_frame.update_idletasks()
+        _parent_canvas_frame.grid(row=6,column=0,columnspan=5,sticky='w',pady=[20,10])
+        _canvas = Canvas(
+            _parent_canvas_frame, 
+            width=self._WG_BROWSE_CANVAS_WIDTH,
+            height=self._WG_BROWSE_CANVAS_HEIGHT,
+            scrollregion=(self._SCRL_REGION_WEST, self._SCRL_REGION_NORTH, self._SCRL_REGION_EAST, self._SCRL_REGION_SOUTH)
+        )
+        _scrollbar = Scrollbar(_parent_canvas_frame,orient="vertical", command=_canvas.yview)
+        self.scroll_frame = Frame(_canvas)
+        _canvas.configure(yscrollcommand=_scrollbar.set)
+        self.scroll_frame.pack(padx=[5,0])
+        _scrollbar.pack(side="right", fill="y", padx=[10,0])
+        _canvas.pack(side="left", fill="both", padx=[0,0])
+        _canvas.create_window((0,0),window=self.scroll_frame,anchor="nw")
+        return
         
-    def input_window(self):
-        self.change_page_button = tk.Button(self.input_frame,text='日報閲覧',command=self.change_frame_browse,font=('meiryo',8),width=8)
-        self.input_title = tk.Label(self.input_frame,text='日報入力',font=('meiryo',15))
-        self.work_date = tb.WorkDate(self.input_frame)
-        values = self.get_company_name()
-        self.company = tb.Company(self.input_frame,values=values)
-        self.work_place = tb.WorkPlace(self.input_frame)
-        self.work_detail = tb.WorkDetail(self.input_frame,80)
-        self.worker = tb.Worker(self.input_frame)
-        self.worker_cost = tb.WorkerCost(self.input_frame)
-        self.material_cost = tb.MaterialCost(self.input_frame)
-        self.sales = tb.Sales(self.input_frame)
         
-        self.change_page_button.grid(row=0,column=4,pady=(20,0))
-        self.input_title.grid(row=1,column=0,columnspan=4,pady=[30,30])
+    def create_input_page(self) -> None:
+        # ウィジェット作成
+        self.__create_input_window_widgets()
+
+        self.change_page_button = Button(self.input_frame,text='日報閲覧',command=self.change_frame_browse,font=('meiryo',8),width=8)
+        self.input_title = Label(self.input_frame,text='日報入力',font=('meiryo',15))
+        self.work_date = WorkDate(self.input_frame)
+
+         # 会社名プルダウン作成用に会社名リスト取得
+        _company_name_list = self.get_company_name_list()
+        self.company = Company(self.input_frame,values=_company_name_list)
+        self.work_place = WorkPlace(self.input_frame)
+        self.work_detail = WorkDetail(self.input_frame,80)
+        self.worker = Worker(self.input_frame)
+        self.worker_cost = WorkerCost(self.input_frame)
+        self.material_cost = MaterialCost(self.input_frame)
+        self.sales = Sales(self.input_frame)
+        
+        self.change_page_button.grid(row=1,column=4)
+        self.input_title.grid(row=1,column=1,columnspan=4,pady=[30,30],padx=[10,20])
         self.work_date.label.grid(row=2,column=0,pady=20)
         self.work_date._textbox.grid(row=2,column=1,pady=20)
         self.company.label.grid(row=3,column=0,pady=20)
@@ -53,10 +152,11 @@ class GuiManager():
         self.material_cost._textbox.grid(row=6,column=1,pady=20)
         self.sales.label.grid(row=6,column=2,pady=20)
         self.sales._textbox.grid(row=6,column=3,pady=20)
-        button = tk.Button(self.input_frame,text='登録',command=self.add_data,font=('meiryo',15),width=15)
+        button = Button(self.input_frame,text='登録',command=self.add_data,font=('meiryo',15),width=15)
         button.grid(row=7,column=0,columnspan=4,pady=[30,0])
+        return
 
-    def browse_window(self):
+    def create_browse_page(self) -> None:
         """データベースからの任意の情報を取得し、表示させる
         
             会社名 : company_name
@@ -69,6 +169,9 @@ class GuiManager():
             売上 : sales
             
         """
+        # ウィジェット作成
+        self.__create_browse_window_widgets()
+
         self.company_name = ""
         self.total_cost = "0"
         self.total_sales = "0"
@@ -78,100 +181,86 @@ class GuiManager():
         self.worker = "0"
         self.cost = 1235
         self.sales = 55555
-        self.change_page_button = tk.Button(self.browse_frame,text='日報入力',command=self.change_frame_input,font=('meiryo',8),width=8)
-        self.browes_title = tk.Label(self.browse_frame,text='日報閲覧',font=('meiryo',15))
-        values = self.get_company_name()
-        self.company = tb.Company(self.browse_frame,values=values)
-        self.total_cost_label = tk.Label(self.browse_frame,text="X月合計経費",font=('meiryo',10))
-        self.show_total_cost = tk.Label(self.browse_frame,text="¥"+self.total_cost,relief="sunken",anchor=tk.E,width=35)
-        self.total_sales_label = tk.Label(self.browse_frame,text="X月合計売上",font=('meiryo',10))
-        self.show_total_sales = tk.Label(self.browse_frame,text="¥"+self.total_cost,relief="sunken",anchor=tk.E,width=35)
+        self._change_page_button = Button(self.browse_frame,text='日報入力',command=self.change_frame_input,font=('meiryo',8),width=8)
+        self.browes_title = Label(self.browse_frame,text='日報閲覧',font=('meiryo',15))
+
+        # 会社名プルダウン作成用に会社名リスト取得
+        _company_name_list = self.get_company_name_list()
+        self.company = Company(self.browse_frame,values=_company_name_list)
+        self.total_cost_label = Label(self.browse_frame,text="X月合計経費",font=('meiryo',10))
+        self.show_total_cost = Label(self.browse_frame,text="¥"+self.total_cost,relief="sunken",anchor='e',width=35)
+        self.total_sales_label = Label(self.browse_frame,text="X月合計売上",font=('meiryo',10))
+        self.show_total_sales = Label(self.browse_frame,text="¥"+self.total_cost,relief="sunken",anchor='e',width=35)
         
-        self.date_label = tk.Label(self.browse_frame,text="日付",font=('meiryo',10),borderwidth=2,relief="ridge")
-        self.work_place_label = tk.Label(self.browse_frame,text="現場名",font=('meiryo',10),borderwidth=2,relief="ridge",padx=10,width=60)
-        self.worker_label = tk.Label(self.browse_frame,text="作業員数",font=('meiryo',10),borderwidth=2,relief="ridge",width=8)
-        self.cost_label = tk.Label(self.browse_frame,text="経費",font=('meiryo',10),borderwidth=2,relief="ridge")
-        self.sales_label = tk.Label(self.browse_frame,text="売上",font=('meiryo',10),borderwidth=2,relief="ridge")
+        self.date_label = Label(self.browse_frame,text="日付",font=('meiryo',10),borderwidth=2,relief="ridge",width=9)
+        self.work_place_label = Label(self.browse_frame,text="現場名",font=('meiryo',10),borderwidth=2,relief="ridge",padx=10,width=50)
+        self.worker_label = Label(self.browse_frame,text="作業員数",font=('meiryo',10),borderwidth=2,relief="ridge",width=8)
+        self.cost_label = Label(self.browse_frame,text="経費",font=('meiryo',10),borderwidth=2,relief="ridge",width=15)
+        self.sales_label = Label(self.browse_frame,text="売上",font=('meiryo',10),borderwidth=2,relief="ridge",width=15)
         
-       
-        # self.change_page_button.pack(side='top',anchor=tk.E)
-        # # self.change_page_button.place(x=700,y=50)
-        # self.browes_title.pack()
-        # self.company.label.pack(side='top',anchor=tk.W)
-        # self.company._conbobox.pack(side='top',anchor=tk.W)
-        # self.total_cost_label.pack()
-        # self.show_total_cost.pack()
-        # self.total_sales_label.pack()
-        # self.show_total_sales.pack()
-        
-        # self.date_label.pack()
-        # self.work_place_label.pack()
-        # self.worker_label.pack()
-        # self.cost_label.pack()
-        # self.sales_label.pack()
-        
-        self.change_page_button.grid(row=0,column=5,sticky=tk.E,pady=[20,10])
-        # self.change_page_button.place(x=700,y=50)
+        self._change_page_button.grid(row=1,column=4)
         self.browes_title.grid(row=1,column=1,columnspan=4,pady=[30,30],padx=[10,20])
         self.company.label.grid(row=2,column=0,pady=[20,10])
-        self.company._conbobox.grid(row=2,column=1,sticky=tk.W,padx=[30,0],pady=[20,10])
+        self.company._conbobox.grid(row=2,column=1,sticky='w',padx=[30,0],pady=[20,10])
         self.total_cost_label.grid(row=3,column=0,pady=[10,10])
         self.show_total_cost.grid(row=3,column=1,pady=[10,10],columnspan=1,)
         self.total_sales_label.grid(row=3,column=2,pady=[10,10])
         self.show_total_sales.grid(row=3,column=3,pady=[10,10],columnspan=3)
         
-        self.date_label.grid(row=5,column=0,sticky=tk.W+tk.E)
-        self.work_place_label.grid(row=5,column=1,columnspan=2,sticky=tk.W+tk.E)
-        self.worker_label.grid(row=5,column=2,sticky=tk.E)
-        self.cost_label.grid(row=5,column=3,sticky=tk.W+tk.E)
-        self.sales_label.grid(row=5,column=4,sticky=tk.W+tk.E)
+        self.date_label.grid(row=5,column=0,sticky='we')
+        self.work_place_label.grid(row=5,column=1,columnspan=2,sticky='we')
+        self.worker_label.grid(row=5,column=2,sticky='e')
+        self.cost_label.grid(row=5,column=3,sticky='we')
+        self.sales_label.grid(row=5,column=4,sticky='we',padx=[0,5])
         
-        self.get_date_label = tk.Label(self.browse_frame,text="2023/6/7",font=('meiryo',10),borderwidth=2,relief="ridge")
-        self.get_work_place_label = tk.Label(self.browse_frame,text="下大利",font=('meiryo',10),borderwidth=2,relief="ridge",anchor=tk.W,padx=10)
-        self.get_worker_label = tk.Label(self.browse_frame,text="0",font=('meiryo',10),borderwidth=2,relief="ridge",width=8,anchor=tk.E)
-        self.get_cost_label = tk.Label(self.browse_frame,text="2534",font=('meiryo',10),borderwidth=2,relief="ridge",width=15,anchor=tk.E)
-        self.get_sales_label = tk.Label(self.browse_frame,text="55000",font=('meiryo',10),borderwidth=2,relief="ridge",width=15,anchor=tk.E)
-        self.delete_button = tk.Button(self.browse_frame,text="削除",command=self.get_data)
-        self.update_button = tk.Button(self.browse_frame,text="変更")
-        
-        self.get_date_label.grid(row=6,column=0,columnspan=1,sticky=tk.W+tk.E)
-        self.get_work_place_label.grid(row=6,column=1,columnspan=2,sticky=tk.W+tk.E)
-        self.get_worker_label.grid(row=6,column=2,sticky=tk.E)
-        self.get_cost_label.grid(row=6,column=3,sticky=tk.W+tk.E)
-        self.get_sales_label.grid(row=6,column=4,sticky=tk.W+tk.E)
-        self.delete_button.grid(row=6,column=5)
-        self.update_button.grid(row=6,column=6)
-        
-        
-    
-    def change_frame_input(self):
+        for i in range(20):
+            ### ウィジェット作成
+            self.get_date_label = Label(self.scroll_frame,text="2023/6/7",font=('meiryo',10),borderwidth=2,relief="ridge",width=9)
+            self.get_work_place_label = Label(self.scroll_frame,text="下大利",font=('meiryo',10),borderwidth=2,relief="ridge",anchor='w',padx=10,width=41)
+            self.get_worker_label = Label(self.scroll_frame,text=i,font=('meiryo',10),borderwidth=2,relief="ridge",width=8,anchor='e')
+            self.get_cost_label = Label(self.scroll_frame,text="2534",font=('meiryo',10),borderwidth=2,relief="ridge",width=15,anchor='e')
+            self.get_sales_label = Label(self.scroll_frame,text="55000",font=('meiryo',10),borderwidth=2,relief="ridge",width=15,anchor='e')
+            self.delete_button = Button(self.scroll_frame,text="削除",command=self.get_registered_data)
+            self.update_button = Button(self.scroll_frame,text="変更")
+
+            ### ウィジェット配置
+            self.get_date_label.grid(row=i,column=0,columnspan=1,sticky='we')
+            self.get_work_place_label.grid(row=i,column=1,sticky='we')
+            self.get_worker_label.grid(row=i,column=2)
+            self.get_cost_label.grid(row=i,column=3)
+            self.get_sales_label.grid(row=i,column=4)
+            self.delete_button.grid(row=i,column=5,padx=[5,2])
+            self.update_button.grid(row=i,column=6,padx=[2,5])
+
+        return
+
+    def change_frame_input(self) -> None:
         self.browse_frame.pack_forget()
-        self.input_frame.pack()
-        self.input_window()
+        self.create_input_page()
+        return
         
-    def change_frame_browse(self):
+    def change_frame_browse(self) -> None:
         self.input_frame.pack_forget()
-        self.browse_frame.pack()
-        self.browse_window()
-        
-    def change_frame(self, now_frame,next_frame):
+        self.create_browse_page()
+        return
+
+    def change_frame(self, now_frame,next_frame) -> None:
         self.now_frame = now_frame
         self.next_frame = next_frame
         self.now_frame.pack_forget()
         self.next_frame.pack()
-        
-    def get_company(self):
-        """登録済みの会社名をデータベースから取得
+        return
+
+    def clear_frame_input(self) -> None:
+        """日報入力フレームクリア
+            NOTE: 「登録ボタン」押下後に日報入力画面をクリアしてプルダウンの更新処理を実行
         """
-        
-        return 
-    # def add_data(self):
-    #     dbc = database_ctrl.DatabaseControl("test.db")
-    #     d = {}
-    #     d["name"] = "shimizu"
-    #     e = dbc.create_table("test1",d)
-    #     print(e)
-    #     return
+        ### 一度日報入力フレームを削除
+        self.input_frame.pack_forget()
+        ### 日報入力フレームを再生成
+        self.create_input_page()
+        return
+
     def add_data(self):
         """データベースに登録
         id -> primary_key
@@ -184,20 +273,34 @@ class GuiManager():
         material_cost -> material_cost
         sales -> sales
         """
-        self.ctl = ctl.AppDataControl()
-        self.register_data = ctl.DataRegistReq()
-        self.register_data.work_date = self.work_date.get_input_text()
-        self.register_data.company_name = self.company.get_input_text()
-        self.register_data.work_place = self.work_place.get_input_text()
-        self.register_data.work_contents = self.work_detail.get_input_text()
-        self.register_data.worker_num = self.worker.get_input_text()
-        self.register_data.worker_cost = self.worker_cost.get_input_text()
-        self.register_data.material_cost = self.material_cost.get_input_text()
-        self.register_data.proceeds = self.sales.get_input_text()
+        _req = DataRegistReq()
+        _req.work_date = self.work_date.get_input_text()
+        _req.company_name = self.company.get_input_text()
+        _req.work_place = self.work_place.get_input_text()
+        _req.work_contents = self.work_detail.get_input_text()
+        _req.worker_num = self.worker.get_input_text()
+        _req.worker_cost = self.worker_cost.get_input_text()
+        _req.material_cost = self.material_cost.get_input_text()
+        _req.proceeds = self.sales.get_input_text()
+        
+        print(f'add_data: execute:\n\
+            work_date = {_req.work_date}\n\
+            company_name = {_req.company_name}\n\
+            work_place = {_req.work_place}\n\
+            work_contents = {_req.work_contents}\n\
+            worker_num = {_req.worker_num}\n\
+            worker_cost = {_req.worker_cost}\n\
+            material_cost = {_req.material_cost}\n\
+            proceeds = {_req.proceeds}\n\
+        ')
 
-        s = self.ctl.register(self.register_data)
+        s = self.app_data_mng.register(_req)
         print(s)
         self.clear_input_area()
+    
+        ### 登録時は会社名プルダウン情報を更新するため一度日報入力フレームを再生成する
+        self.clear_frame_input()
+        return
     
     def clear_input_area(self):
         self.work_date.delete_input_value()
@@ -210,45 +313,132 @@ class GuiManager():
         self.material_cost.delete_input_value()
         self.sales.delete_input_value()
     
-    def get_data(self):
-        self.ctl = ctl.AppDataControl()
-        self.fetch = ctl.DataFetchReq()
-        self.fetch.id = -1
-        self.fetch.company_name = "株式会社新栄輸送"
-        print(self.ctl.fetch(self.fetch))
-        data_list = self.ctl.fetch(self.fetch)
-        
-        # name_list = []
-        # for v in data_list:
-        #     name_list.append(v.company_name)
-        #     for v in name_list:
-        #        name_list[]
-        
-        
-        # for i, v in enumerate(data_list):
-        #     # print(i,v.company_name)
-        #     # if v.company_name == name_list[i]:
-        #     #     continue
-        #     if len(name_list[1]) != v.company_name or name_list == []:
-        #         name_list.append(v.company_name)
-        # print(name_list[5],len(name_list),len(data_list))
-        # print(name_list)
-        
-    def get_company_name(self) -> list[str]:
-        self.ctl = ctl.AppDataControl()
-        self.fetch = ctl.DataFetchReq()
-        self.fetch.id = -1
-        data_list = self.ctl.fetch(self.fetch)
-        name_list = []
+    def get_registered_data(self, target_company_name: str = "", id: int = 0) -> List[DataFetchRsp]:
+        """登録データ取得
+            NOTE:全データを取得する場合は「取得対象の会社名」「取得対象のID」を指定せず本メソッドをコールする
 
-        for data in data_list:
-            if data.company_name in name_list:
+        Args:
+            target_company_name (str, optional): 取得対象の会社名. Defaults to "".
+            id (int, optional): 取得対象のID. Defaults to 0.
+
+        Returns:
+            List[DataFetchRsp]: _description_
+        """
+        ### 要求生成
+        _req: DataFetchReq = DataFetchReq()
+        _req.id = id
+        _req.company_name = target_company_name
+        
+        ### 応答生成
+        _rsp_list: List[DataFetchRsp] = self.app_data_mng.fetch(_req)
+        
+        # 応答データ内容表示　NOTE:デバッグ用
+        print(f'get_registered_data: responce data = {_rsp_list}')
+        return _rsp_list
+        
+    def get_company_name_list(self) -> list[str]:
+        """会社名リスト取得
+
+        Returns:
+            list[str]: 会社名リスト
+        """
+        ### 要求生成
+        _req = DataFetchReq()
+        _req.id = -1
+        ### 要求実行
+        registered_data_list: List[DataFetchRsp] = self.get_registered_data()
+
+        # 取得データ表示 NOTE: デバッグ用
+        print(f'get_company_name_list:\n\
+                list length = {len(registered_data_list)}\n\
+                registered data list = {registered_data_list}\
+        ')
+
+        ### 応答生成
+        _rsp_list: list[str] = []
+        for registered_data in registered_data_list:
+            # 名前リストに該当する名前が存在する場合は追加しない
+            if registered_data.company_name in _rsp_list:
                 continue
-            for _data in data_list:
-                if not data.company_name == _data.company_name:
-                    name_list.append(data.company_name)
-                    break    
-        return name_list
+
+            # 名前リストに会社名を追加する
+            _rsp_list.append(registered_data.company_name)
+
+        return _rsp_list
+
+    def get_total_material_cost(self, target_company_name:str) -> int:
+        """合計経費取得
+
+        Args:
+            target_company_name (str): 取得対象の会社名
+
+        Returns:
+            int: 合計経費
+        """
+        ### 対象会社名の全データ取得
+        registered_data_list: List[DataFetchRsp] = self.get_registered_data(target_company_name=target_company_name)
+        
+        # 取得データ表示 NOTE: デバッグ用
+        print(f'get_total_material_cost:\n\
+                list length = {len(registered_data_list)}\n\
+                registered data list = {registered_data_list}\
+        ')
+        
+        ### 経費情報のみの配列データ生成
+        _material_cost_list: List[int] = []
+        for registered_data in registered_data_list:
+            # 経費情報を配列に追加
+            _material_cost_list.append(registered_data.material_cost) 
+        
+        ### 合計値応答
+        return sum(_material_cost_list)
+
+    def get_total_proceeds(self, target_company_name:str) -> int:
+        """合計売上取得
+
+        Args:
+            target_company_name (str): 取得対象の会社名
+
+        Returns:
+            int: 合計売上
+        """
+        ### 対象会社名の全データ取得
+        registered_data_list: List[DataFetchRsp] = self.get_registered_data(target_company_name=target_company_name)
+        
+        # 取得データ表示 NOTE: デバッグ用
+        print(f'get_total_material_cost:\n\
+                list length = {len(registered_data_list)}\n\
+                registered data list = {registered_data_list}\
+        ')
+        
+        ### 売上情報のみの配列データ生成
+        _proceeds_list: List[int] = []
+        for registered_data in registered_data_list:
+            # 売上情報を配列に追加
+            _proceeds_list.append(registered_data.proceeds) 
+        
+        ### 合計値応答
+        return sum(_proceeds_list)
+
+    def cyle(self) -> None:
+        """メインウィンドウ処理
+        """
+        ### メインウィンドウループ処理開始
+        self.root.mainloop()
+        return
+
+    def terminate(self) -> None:
+        """画面終了処理
+        """
+        ### 終了処理
+        # データベース切断処理
+        self.app_data_mng.terminate()
+        print('Nippo app is terminate.')
+
+        # メインウィンドウ削除
+        self.root.destroy()
+        return
             
 if __name__ == "__main__":
-    GuiManager()
+    nippo_app_window = Window()
+    nippo_app_window.cyle()

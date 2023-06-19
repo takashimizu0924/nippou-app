@@ -9,7 +9,7 @@ DEBUG_MODE: bool = False
 if DEBUG_MODE:  
     from typing import TYPE_CHECKING
     if TYPE_CHECKING:
-        from typing import Dict, List, Optional, Tuple, Union
+        from typing import Dict, List, Optional, Tuple, Union, Callable
 
 else:
     from typing import Dict, List, Optional, Tuple, Union
