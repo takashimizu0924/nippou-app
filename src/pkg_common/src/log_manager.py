@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
-# from file_manager import read
+from pkg_common.file_manager import FileManager
 
 class LogLevel:
     """ログレベルデータ型クラス
@@ -18,21 +18,34 @@ class LogLevel:
 class LogManager:
     """ログデータ制御クラス
     """
-    def __init__(self, save_path: str, level: LogLevel = LogLevel.DEBUG) -> None:
+    def __init__(self, save_path: str = '', level: LogLevel = LogLevel.DEBUG) -> None:
         """コンストラクタ
 
         Args:
             save_path (str, optional): 保存先パス. Defaults to ''.
             level (LogLevel, optional): ログレベル. Defaults to LogLevel.WARNING.
         """
+        _save_path: str = save_path
         # 引数チェック
-        if save_path == '':
-            raise Exception("Dose not exists save path.")
+        if _save_path == '':
+            ### ファイルマネージャ生成
+            config_file_name: str = "global_setting.json"
+            config_file_path: str = f'../../../../config/{config_file_name}'
+            file_mng: FileManager = FileManager()
+            ## 設定ファイル読み込み
+            config_data: dict = file_mng.json_read(config_file_path)
+            
+            ### プロジェクト設定情報
+            project_dir_path: str = config_data["PROJECT_DIR_PATH"]
+            
+            ### ログマネージャ生成
+            log_config: dict = config_data["LOG"]
+            _save_path = f'{project_dir_path}{log_config["SAVE_PATH"]}{log_config["SAVE_FILE_NAME"]}'
 
         # ロガーの名前設定
         self.logger = logging.getLogger("nippou_app")
         self.logger.setLevel(level)
-        fh = self._file_handler(save_path, level)
+        fh = self._file_handler(_save_path, level)
         ch = self._console_handler(level)
 
         self.logger.addHandler(fh)

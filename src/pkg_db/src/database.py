@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import sqlite3
 from typing import (Union, List, Dict, Tuple)
+# ログ用パッケージ
+from pkg_common.log_manager import LogManager
 
 
 ### データクラス定義 ###
@@ -39,6 +41,7 @@ class Database:
     def __init__(self, database_name: str) -> None:
         """コンストラクタ
         """
+        self.log = LogManager()
         # NOTE:データベースに接続する処理を記述する
         self._conn = sqlite3.connect(database_name)
         self._cur = self._conn.cursor()
@@ -70,12 +73,12 @@ class Database:
         """
         # 引数チェック
         if table_name == "":
-            print("指定されたテーブル名が空のためエラー")
+            self.log.error("指定されたテーブル名が空のためエラー")
             return DatabaseRetCode.DB_CREATE_TABLE_ERROR
         
         # 引数チェック
         if table_data_dict == {} or table_data_dict == None:
-            print("指定されたテーブルデータが空のためエラー")
+            self.log.error("指定されたテーブルデータが空のためエラー")
             return DatabaseRetCode.DB_CREATE_TABLE_ERROR
 
         # クエリー作成用変数定義
@@ -89,7 +92,7 @@ class Database:
         # 実行用sqlを生成
         _sql: str = f'CREATE TABLE {table_name}({_query})'
         # sql文を確認
-        print(f"{_sql}")
+        self.log.debug(f"{_sql}")
 
         # sql文を実行
         self.__execute(_sql)
@@ -110,12 +113,12 @@ class Database:
         """
         # 引数チェック
         if table_name == "":
-            print("指定されたテーブル名が空のためエラー")
+            self.log.error("指定されたテーブル名が空のためエラー")
             return DatabaseRetCode.DB_TABLE_INSERT_RECORD_ERROR
         
         # 引数チェック
         if record_data_dict == {} or record_data_dict == None:
-            print("指定されたレコードデータが空のためエラー")
+            self.log.error("指定されたレコードデータが空のためエラー")
             return DatabaseRetCode.DB_TABLE_INSERT_RECORD_ERROR
 
         # NOTE: テーブルへのレコードデータ挿入処理を記述する
@@ -143,7 +146,7 @@ class Database:
         # 実行用sqlを生成
         _sql: str = f'INSERT INTO {table_name}({_column_names}) VALUES({_values})'
         # sql文を確認
-        print(f"{_sql}")
+        self.log.debug(f"{_sql}")
 
         # sql文を実行
         self.__execute(_sql)
@@ -165,17 +168,17 @@ class Database:
         """
         # 引数チェック
         if table_name == "":
-            print("指定されたテーブル名が空のためエラー")
+            self.log.error("指定されたテーブル名が空のためエラー")
             return DatabaseRetCode.DB_TABLE_UPDATE_RECORD_ERROR
         
         # 引数チェック
         if id <= 0:
-            print("指定されたIDが 0 以下のためエラー")
+            self.log.error("指定されたIDが 0 以下のためエラー")
             return DatabaseRetCode.DB_TABLE_UPDATE_RECORD_ERROR
         
         # 引数チェック
         if update_record_data_dict == {} or update_record_data_dict == None:
-            print("指定されたレコードデータが空のためエラー")
+            self.log.error("指定されたレコードデータが空のためエラー")
             return DatabaseRetCode.DB_TABLE_UPDATE_RECORD_ERROR
 
         # クエリー作成用変数定義
@@ -202,7 +205,7 @@ class Database:
         # 実行用sqlを生成
         _sql: str = f'UPDATE {table_name} SET {_query} WHERE ID = {id}'
         # sql文を確認
-        print(f"{_sql}")
+        self.log.debug(f"{_sql}")
 
         # sql文を実行
         self.__execute(_sql)
@@ -224,17 +227,17 @@ class Database:
 
         # 引数チェック
         if table_name == "":
-            print("指定されたテーブル名が空のためエラー")
+            self.log.error("指定されたテーブル名が空のためエラー")
             return DatabaseRetCode.DB_TABLE_DELETE_RECORD_ERROR
 
         # 引数チェック
         if id <= 0:
-            print("指定されたIDが 0 以下のためエラー")
+            self.log.error("指定されたIDが 0 以下のためエラー")
             return DatabaseRetCode.DB_TABLE_DELETE_RECORD_ERROR
 
         _sql: str = f'DELETE FROM {table_name} WHERE ID = {id}'
         # sql文を確認
-        print(f"{_sql}")
+        self.log.error(f"{_sql}")
 
         # sql文を実行
         self.__execute(_sql)
@@ -257,7 +260,7 @@ class Database:
         """
         # 引数チェック
         if table_name == "":
-            print("指定されたテーブル名が空のためエラー")
+            self.log.error("指定されたテーブル名が空のためエラー")
             return DatabaseRetCode.DB_TABLE_FETCH_RECORD_ERROR, {}
         
          # クエリー作成用変数定義
@@ -297,14 +300,14 @@ class Database:
         # 実行用sqlを生成
         _sql: str = f'SELECT * FROM {table_name}{_query}'
         # sql文を確認
-        print(f"{_sql}")
+        self.log.debug(f"{_sql}")
 
         # sql文を実行
         self.__execute(_sql)
 
         # 応答生成
         rsp_list = self._cur.fetchall()
-        print(f"{rsp_list}")
+        self.log.debug(f"{rsp_list}")
         
         return DatabaseRetCode.SUCCESS, rsp_list
 
@@ -317,7 +320,7 @@ class Database:
         # NOTE: データベース切断処理を記述する
         self._cur.close()
         self._conn.close()
-        print("データベース切断完了")
+        self.log.debug("データベース切断完了")
         return DatabaseRetCode.SUCCESS
 
 

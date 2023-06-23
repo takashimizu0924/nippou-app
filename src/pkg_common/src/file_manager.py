@@ -6,6 +6,8 @@ from typing import Dict, List, Optional, Tuple, Union
 # ファイルパス存在確認用
 import os
 import json
+# スタックトレース取得用
+import traceback
 
 ### ファイル入出力管理クラス定義 ###
 class FileManager:
@@ -41,8 +43,8 @@ class FileManager:
                 print(_rsp)
         
         # 読み込みを失敗した場合ここに入る
-        except Exception as e:
-            print(f"Error message: {e}")
+        except Exception:
+            print(f"Error message: {traceback.format_exc()}")
             return _rsp
         
         return _rsp
@@ -68,8 +70,8 @@ class FileManager:
                 file.writelines(_write_text_list)
 
         #書き込みを失敗した場合ここに入る
-        except Exception as e:
-            print(f"Error message: {e}")
+        except Exception:
+            print(f"Error message: {traceback.format_exc()}")
             return False
 
         return True
@@ -96,10 +98,10 @@ class FileManager:
             with open(json_file_path, "r") as json_file:
                 # splitで指定した改行コードを基準に配列化
                 _rsp = json.load(json_file)
-        
+
         # 読み込みを失敗した場合ここに入る
-        except Exception as e:
-            print(f"Error message: {e}")
+        except Exception:
+            print(f"Error message: {traceback.format_exc()}")
             return _rsp
         
         return _rsp
