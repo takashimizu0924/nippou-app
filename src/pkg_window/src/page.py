@@ -4,58 +4,66 @@
 # アノテーション用パッケージ
 from __future__ import annotations
 from typing import (List, Tuple, Dict, Optional, Union)
+# tkinter
+from tkinter import Frame
+# 抽象クラス
+from abc import ABCMeta, abstractmethod
 # ログ用パッケージ
 from pkg_common.log_manager import LogManager
 
 
-class Page:
-    """ページクラス
+class Base(metaclass = ABCMeta):
+    """ページクラス(抽象クラス)
     """
-    def __init__(self, page_name_tag: str) -> None:
+    def __init__(self, page_name_tag: str, master: Optional[Frame]) -> None:
         """コンストラクタ
 
         Args:
             page_name_tag (str): ページ名タグ文字列
         """
-        self._name_tag: str = page_name_tag
-        self._frame_list: List[object] = []
-        self._start_
+        # ページ情報生成
+        self._page_name_tag: str = page_name_tag
+        self._master_frame: Frame = master
         # ログマネージャインスタンス生成
-        # self._log: LogManager = LogManager()
+        self._log: LogManager = LogManager()
 
-    def set_start(self, start_page_frame_dict: Dict[str, object]) -> bool:
-        """スタートページ設定
-            NOTE:以下のパラメータを与えてアプリ開始時のスタートページを設定する
-                {"<スタートページタグ名>": <スタートページフレームオブジェクト>}
+    def setup(self) -> None:
+        """セットアップ
+
+        Raises:
+            NotImplementedError: 抽象メソッドの実装無しエラー
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def set_enable(self, enable: bool) -> None:
+        """ページ有効・無効状態設定
 
         Args:
-            start_page_frame_dict (Dict[str, object]): スタートページ辞書データ
+            enable (bool): 設定する状態 [True:有効 / False:無効]
+
+        Raises:
+            NotImplementedError: 抽象メソッドの実装無しエラー
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_enable(self) -> bool:
+        """ページ有効・無効状態取得
+
+        Raises:
+            NotImplementedError: 抽象メソッドの実装無しエラー
 
         Returns:
-            bool: _description_
+            bool: True:有効 / False:無効
         """
+        raise NotImplementedError()
 
-    def add_frame(self, frame_list: List[object]) -> bool:
-        """フレームをページに追加
-
-        Args:
-            frame_list (List[object]): 追加するフレーム配列
-        """
-        ### 応答データ作成
-        _rsp: bool = False
-
-        # 引数チェック
-        if len(frame_list) <= 0:
-            print(f'Page class:add_frame method --> Add frame failed. frame_list length is {len(frame_list)}')
-            return _rsp
-
-        # フレーム追加
-        self._frame_list.extend(frame_list)
-        _rsp = True
-
-        # 応答
-        return _rsp
-    
+    @abstractmethod
     def clear(self) -> None:
         """ページクリア
+
+        Raises:
+            NotImplementedError: 抽象メソッドの実装無しエラー
         """
+        raise NotImplementedError()
