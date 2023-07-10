@@ -1,4 +1,5 @@
 import tkinter as tk
+from threading import Thread
 from main_window import Window
 from login import Login
 
@@ -19,6 +20,8 @@ class App:
         self._RESIZE_WINDOW_Y: bool = False
         self.login: Login = None
         self.window: Window = None
+
+        self.main_page_th: Thread = Thread(target=self.wait_for_login)
         self.__create_root()
                 
     def __create_root(self) -> None:
@@ -37,6 +40,10 @@ class App:
 
     def show_main_page(self) -> None:
         self.window = Window(self.root)
+        self.main_page_th.start()
+
+    def destroy_main_page_th(self) -> None:
+        self.main_page_th.join()
 
     def wait_for_login(self) -> None:
         while True:
@@ -46,13 +53,13 @@ class App:
                 break
         self.window.input_data_window()
 
-
 def main():
     app = App()
     app.show_login_page()
     app.show_main_page()
     app.start()
     app.wait_for_login()
+    app.destroy_main_page_th()
 
 if __name__ == "__main__":
     main()
