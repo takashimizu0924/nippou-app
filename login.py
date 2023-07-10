@@ -21,10 +21,8 @@ class Login:
         
         self.frame = tk.Frame(self.root)
         self.frame.pack()
-        # self.input_widget()
-        
-        
-        
+        # 入力用ウィジェット配置
+        self.input_widget()
         
     def input_widget(self):
         """入力用ウィジェットを配置"""
@@ -61,6 +59,7 @@ class Login:
             messagebox.showinfo("確認", "未登録なのでそのまま登録してください")
             self.login_button.config(text="登録", command=self.__add_user(company_name, user_name, password))
         self.frame.destroy()
+
     def __add_user(self, company_name, user_name, user_password):
         self.db_ctr.insert_user(company_name, user_name, user_password)
     
@@ -78,15 +77,3 @@ class Login:
         
         print(self._USER_NAME)
         return self._USER_NAME
-        
-        # self.window = Window(self.root, self._USER_NAME)
-        # self.window.input_data_window()
-         
-        # self.__login_check()
-        # self.__add_user(self._COMPANY_NAME, self._USER_NAME, self._USER_PASSWORD)
-        # try:
-        #     if len(self.database) > 0:
-        #         print("ok")
-        # except:
-        #     print("Not in database...")
-        #     return
