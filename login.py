@@ -7,7 +7,6 @@ class Login:
     def __init__(self, root) -> None:
         
         self.root = root
-        self.flag = False
         
         self._COMPANY_NAME: str = ""
         self._USER_NAME: str = ""
@@ -61,8 +60,6 @@ class Login:
             print("none")
             messagebox.showinfo("確認", "未登録なのでそのまま登録してください")
             self.login_button.config(text="登録", command=self.__add_user(company_name, user_name, password))
-            self.flag = True
-        self.flag = True
         self.frame.destroy()
     def __add_user(self, company_name, user_name, user_password):
         self.db_ctr.insert_user(company_name, user_name, user_password)
@@ -79,6 +76,7 @@ class Login:
         else:
             self.__login_check(self._COMPANY_NAME, self._USER_NAME, self._USER_PASSWORD)
         
+        print(self._USER_NAME)
         return self._USER_NAME
         
         # self.window = Window(self.root, self._USER_NAME)

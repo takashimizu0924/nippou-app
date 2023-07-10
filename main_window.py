@@ -88,4 +88,4 @@ class Window():
         submit.pack(pady=(30,5))
         
     def show(self) -> None:
-        print("TEST",self.user_name)
+        print(f"TEST '{self.user_name}'")
