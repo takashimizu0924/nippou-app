@@ -9,9 +9,9 @@ class Login:
         self.root = root
         self.flag = False
         
-        self._COMPANY_NAME: str
-        self._USER_NAME: str
-        self._USER_PASSWORD: int
+        self._COMPANY_NAME: str = ""
+        self._USER_NAME: str = ""
+        self._USER_PASSWORD: int = 0
         
         
         #テスト用仮想データベース

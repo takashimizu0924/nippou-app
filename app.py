@@ -60,9 +60,10 @@ class App:
         # self.window = Window()
         self.login =Login(self.root)
         self.login.input_widget()
+
         window = Window(self.root, self.login._USER_NAME)
-        window.input_data_window()
-        
+        # window.input_data_window()
+        window.show()
         
         # if self.login.flag == False:
         #     self.login.input_widget()

@@ -87,4 +87,5 @@ class Window():
         submit = tk.Button(submit_frame, text="登録", width=10)
         submit.pack(pady=(30,5))
         
-    
+    def show(self) -> None:
+        print("TEST",self.user_name)
