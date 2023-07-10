@@ -29,21 +29,30 @@ class App:
         self.root.geometry(f"{self._APP_WIDTH}x{self._APP_HEIGHT}+{self._APP_POSITION_X}+{self._APP_POSITION_Y}")
         self.root.resizable(width=self._RESIZE_WINDOW_X, height=self._RESIZE_WINDOW_Y)
     
-    def start(self) -> None:     
+    def start(self) -> None:
         self.root.mainloop()
 
     def show_login_page(self) -> None:
         self.login = Login(self.root)
 
     def show_main_page(self) -> None:
-        self.window = Window(self.root, self.login._USER_NAME)
+        self.window = Window(self.root)
+
+    def wait_for_login(self) -> None:
+        while True:
+            user_name = self.login.get_login_user_name()
+            if user_name != '':
+                self.window.set_user_name(user_name)
+                break
+        self.window.input_data_window()
 
 
 def main():
     app = App()
-    app.start()
     app.show_login_page()
     app.show_main_page()
+    app.start()
+    app.wait_for_login()
 
 if __name__ == "__main__":
     main()

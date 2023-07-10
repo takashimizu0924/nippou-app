@@ -5,12 +5,12 @@ import tkinter.ttk as ttk
 class Window():
     """ウィンドウ(画面表示)クラス
     """
-    def __init__(self, root, user_name) -> None:
+    def __init__(self, root) -> None:
         """メイン画面表示
            各ウィンドウサイズ設定
         """
         self.root = root
-        self.user_name = user_name
+        self.user_name = ''
         self._APP_TITLE: str = "業務管理アプリ"
         self._APP_WIDTH: int = 1000
         self._APP_HEIGHT: int = 700
@@ -86,6 +86,14 @@ class Window():
         
         submit = tk.Button(submit_frame, text="登録", width=10)
         submit.pack(pady=(30,5))
+
+    def set_user_name(self, user_name) -> None:
+        """ユーザー名設定
+
+        Args:
+            user_name (_type_): ユーザー名
+        """
+        self.user_name = user_name
         
     def show(self) -> None:
         print(f"TEST '{self.user_name}'")

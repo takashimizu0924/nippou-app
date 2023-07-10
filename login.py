@@ -76,4 +76,6 @@ class Login:
             self.__login_check(self._COMPANY_NAME, self._USER_NAME, self._USER_PASSWORD)
         
         print(self._USER_NAME)
+
+    def get_login_user_name(self) -> str:
         return self._USER_NAME
