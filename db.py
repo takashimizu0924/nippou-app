@@ -103,6 +103,27 @@ class DatabaseControl:
         self.__commit()
         
         
+    def fetch_user_all(self) -> str:
+        """ユーザーテーブルを全て取得
+
+        Args:
+            company_name (_type_): _description_
+            user_name (_type_): _description_
+            password (_type_): _description_
+
+        Returns:
+            list: _description_
+        """
+        table_name: str = "user"
+        #実行用sql文を作成
+        _sql: str = f"SELECT * FROM {table_name}"
+        #実行用sql文を実行
+        self.__execute(_sql)
+        
+        res_list = self._cur.fetchall()
+       
+        
+        return DatabaseRetCode.SUCCESS, res_list
     
     def fetch_user(self, company_name, user_name, password) -> list:
         """ユーザーテーブルに登録されているユーザーを取得

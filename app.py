@@ -1,5 +1,4 @@
 import tkinter as tk
-from threading import Thread
 from main_window import Window
 from login import Login
 
@@ -18,48 +17,49 @@ class App:
         self._APP_POSITION_Y: int = 150
         self._RESIZE_WINDOW_X: bool = False
         self._RESIZE_WINDOW_Y: bool = False
-        self.login: Login = None
-        self.window: Window = None
-
-        self.main_page_th: Thread = Thread(target=self.wait_for_login)
-        self.__create_root()
-                
-    def __create_root(self) -> None:
-        """メイン画面の設定
-        """
+        
+        self._INPUT_DATA_TITLE: str = "日報入力"
+        self._INPUT_DATA_WIDTH: int = 750
+        self._INPUT_DATA_HEIGHT: int = 450
+        self._INPUT_DATA_POSITION_X: int = 520
+        self._INPUT_DATA_POSITION_Y: int = 250
+        
+    
+    def start(self):
         self.root = tk.Tk()
         self.root.title(self._APP_TITLE)
         self.root.geometry(f"{self._APP_WIDTH}x{self._APP_HEIGHT}+{self._APP_POSITION_X}+{self._APP_POSITION_Y}")
         self.root.resizable(width=self._RESIZE_WINDOW_X, height=self._RESIZE_WINDOW_Y)
-    
-    def start(self) -> None:
+        window = Window(self.root)
+        
+        self.login = Login(self.root, window)
+        
+        # print(self.login.flag)
+        # # user = self.login.login_user()
+        # # print(user)
+        # self.login.input_widget()
+        # print("USERNAME->>",self.login._USER_NAME)
+        # if self.login.flag:
+        #     print("OK")
+        # window = Window(self.root, self.login._USER_NAME)
+        # window.browse_data_window()
+        # window.input_data_window()
+        
+        
+        # if self.login.flag == False:
+        #     self.login.input_widget()
+            # self.user_name =self.login.login()
+            # self.user_name = self.login
+            # window = Window(self.root, self.user_name)
+            # window.input_data_window()
+             
         self.root.mainloop()
+        
+        
+        
 
-    def show_login_page(self) -> None:
-        self.login = Login(self.root)
 
-    def show_main_page(self) -> None:
-        self.window = Window(self.root)
-        self.main_page_th.start()
-
-    def destroy_main_page_th(self) -> None:
-        self.main_page_th.join()
-
-    def wait_for_login(self) -> None:
-        while True:
-            user_name = self.login.get_login_user_name()
-            if user_name != '':
-                self.window.set_user_name(user_name)
-                break
-        self.window.input_data_window()
-
-def main():
-    app = App()
-    app.show_login_page()
-    app.show_main_page()
-    app.start()
-    app.wait_for_login()
-    app.destroy_main_page_th()
 
 if __name__ == "__main__":
-    main()
+    app = App()
+    app.start()
