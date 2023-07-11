@@ -76,6 +76,7 @@ class DatabaseControl:
         _sql: str = f"CREATE TABLE IF NOT EXISTS {table_name}(id INTEGER PRIMARY KEY AUTOINCREMENT, user_name TEXT, workdate DATETIME, company_name TEXT, work_place TEXT, work_detail TEXT, worker INTEGER, worker_cost INTEGER, material_cost INTEGER, sales INTEGER)"
         
         #実行用sql文を実行
+        print(_sql)
         self.__execute(_sql)
         
         self.__commit()
@@ -90,18 +91,29 @@ class DatabaseControl:
             user_name (_type_): _description_
             password (_type_): _description_
         """
-        # test = f"SELECT * FROM user"
-        # c = self._cur.execute(test)
-        # name = c.description
-        # print(c)
-        # _sql: str = f"INSERT INTO user (company_name, user_name, password)VALUES ('test2', 'shimizu', '11111')"
         if company_name == "" or user_name == "" or password == "":
             print("登録内容に不備があります")
         _sql: str = f"INSERT INTO user (company_name, user_name, password)VALUES ('{company_name}','{user_name}','{password}')"
-        print(_sql)
         self.__execute(_sql)
         self.__commit()
+    def insert_data(self, user_name: str, date: str, company_name: str,work_place: str, work_detail: str, worker: int, worker_cost: int, material_cost: int, sales: int) -> None:
+        """データ挿入
+
+        Args:
+            date (str): _description_
+            company_name (str): _description_
+            work_place (str): _description_
+            work_detail (str): _description_
+            worker (int): _description_
+            worker_cost (int): _description_
+            material_cost (int): _description_
+            sales (int): _description_
+        """
+        _sql: str = f"INSERT INTO '{user_name}' (user_name, workdate, company_name, work_place, work_detail, worker, worker_cost, material_cost, sales)VALUES ('{user_name}','{date}','{company_name}','{work_place}','{work_detail}','{worker}', '{worker_cost}', '{material_cost}', '{sales}')"
         
+        self.__execute(_sql)
+        self.__commit()
+            
         
     def fetch_user_all(self) -> str:
         """ユーザーテーブルを全て取得
@@ -155,6 +167,7 @@ class DatabaseControl:
         Returns:
             list: 取得したデータのリスト
         """
+        print(f"{table_name},koko")
         if table_name == "":
             return DatabaseRetCode.DB_CREATE_TABLE_ERROR
         

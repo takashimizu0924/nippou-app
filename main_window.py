@@ -1,5 +1,6 @@
 import tkinter as tk 
 import tkinter.ttk as ttk
+from db import DatabaseControl
 
 
 class Window():
@@ -27,6 +28,19 @@ class Window():
         
         #各Frame
         self.login_frame = tk.Frame()
+        
+        #データ用
+        self.data_dict = {
+            "user_name": str,
+            "work_date": str,
+            "company_name": str,
+            "work_place": str,
+            "work_detail": str,
+            "worker": int,
+            "worker_cost": int,
+            "material_cost": int,
+            "sales": int
+        }
         
         
     def main_window(self, username) -> None:
@@ -63,6 +77,7 @@ class Window():
         #ログインボタン
         self.login_button = tk.Button(self.login_frame, text="ログイン", command=self.login)
         self.login_button.grid(row=4, column=0, columnspan=2)
+        
     #日報入力画面作成
     def input_data_window(self) -> None:
         window = tk.Toplevel()
@@ -118,10 +133,40 @@ class Window():
         submit = tk.Button(submit_frame, text="登録", width=10)
         submit.pack(pady=(30,5))
     
-    #テスト用
-    def show_username(self, username) -> None:
-        print(f"{'テスト'+username}")
+    #Userの登録データを取得
+    def get_data(self, username) -> str:
+        db_ctr = DatabaseControl()
+        print("username",username)
+        data_list = db_ctr.fetch_data(username)
+        print(data_list)
     
+    #Userの入力データを登録
+    def add_data(self):
+        user_name = self.user_name
+        work_date = self.date_label_entry.get()
+        company_name = self.company_entry.get()
+        work_place = self.workplace_entry.get()
+        work_detail = self.workdetail_entry.get()
+        worker = self.worker_entry.get()
+        worker_cost = self.workercost_entry.get()
+        material_cost = self.materialcost_entry.get()
+        sales = self.sales_entry.get()
+        
+        self.data_dict["user_name"] = user_name
+        self.data_dict["work_date"] = work_date
+        self.data_dict["company_name"] = company_name
+        self.data_dict["work_place"] = work_place
+        self.data_dict["work_detail"] = work_detail
+        self.data_dict["worker"] = int(worker)
+        self.data_dict["worker_cost"] = int(worker_cost)
+        self.data_dict["material_cost"] = int(material_cost)
+        self.data_dict["sales"] = int(sales)
+        print(self.data_dict["user_name"])
+        db_ctr = DatabaseControl()
+        db_ctr.insert_data(user_name, work_date, company_name, work_place, work_detail, int(worker), int(worker_cost), int(material_cost), int(sales))
+            
+            
+            
     #アプリを終了する関数
     def quit_app(self) -> None:
         self.root.quit()
@@ -146,7 +191,7 @@ class Window():
         for item_id in selected_id:
             self.tree.delete(item_id)
 
-    """日報入力用関数"""
+    # 日報入力用ページ
     def open_add_inputdata(self) -> None:
         
         subwindow = tk.Toplevel()
@@ -181,28 +226,31 @@ class Window():
         materialcost_label.grid(row=5, column=0, padx=(38,5), pady=(10,10), sticky=tk.E)
         salese_label.grid(row=5, column=2, padx=(38,5), pady=(10,10), sticky=tk.E)
         
-        date_label_entry = tk.Entry(main_frame, width=20, font=("meiryo", 8))
-        company_entry = ttk.Combobox(main_frame, width=25, font=("meiryo", 8))
-        workplace_entry = tk.Entry(main_frame, width=30, font=("meiryo", 8))
-        workdetail_entry = tk.Entry(main_frame, width=30, font=("meiryo", 8))
-        worker_entry = tk.Entry(main_frame, width=15, font=("meiryo", 8), justify="right")
-        workercost_entry = tk.Entry(main_frame, width=30, font=("meiryo", 8), justify="right")
-        materialcost_entry = tk.Entry(main_frame, width=30, font=("meiryo", 8), justify="right")
-        sales_entry = tk.Entry(main_frame, width=30, font=("meiryo", 8), justify="right")
+        self.date_label_entry = tk.Entry(main_frame, width=20, font=("meiryo", 8))
+        self.company_entry = ttk.Combobox(main_frame, width=25, font=("meiryo", 8))
+        self.workplace_entry = tk.Entry(main_frame, width=30, font=("meiryo", 8))
+        self.workdetail_entry = tk.Entry(main_frame, width=30, font=("meiryo", 8))
+        self.worker_entry = tk.Entry(main_frame, width=15, font=("meiryo", 8), justify="right")
+        self.workercost_entry = tk.Entry(main_frame, width=30, font=("meiryo", 8), justify="right")
+        self.materialcost_entry = tk.Entry(main_frame, width=30, font=("meiryo", 8), justify="right")
+        self.sales_entry = tk.Entry(main_frame, width=30, font=("meiryo", 8), justify="right")
         
-        date_label_entry.grid(row=1, column=1, padx=(20,10), pady=(10,10),sticky="w")
-        company_entry.grid(row=2, column=1, padx=(20,10), pady=(10,10), sticky=tk.W)
-        workplace_entry.grid(row=2, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
-        workdetail_entry.grid(row=3, column=1, padx=(20,10), pady=(10,10), columnspan=4, sticky=tk.EW)
-        worker_entry.grid(row=4, column=1, padx=(20,10), pady=(10,10), sticky=tk.W)
-        workercost_entry.grid(row=4, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
-        materialcost_entry.grid(row=5, column=1, padx=(20,10), pady=(10,10), sticky=tk.EW)
-        sales_entry.grid(row=5, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
+        self.date_label_entry.grid(row=1, column=1, padx=(20,10), pady=(10,10),sticky="w")
+        self.company_entry.grid(row=2, column=1, padx=(20,10), pady=(10,10), sticky=tk.W)
+        self.workplace_entry.grid(row=2, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
+        self.workdetail_entry.grid(row=3, column=1, padx=(20,10), pady=(10,10), columnspan=4, sticky=tk.EW)
+        self.worker_entry.grid(row=4, column=1, padx=(20,10), pady=(10,10), sticky=tk.W)
+        self.workercost_entry.grid(row=4, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
+        self.materialcost_entry.grid(row=5, column=1, padx=(20,10), pady=(10,10), sticky=tk.EW)
+        self.sales_entry.grid(row=5, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
         
-        submit = tk.Button(submit_frame, text="登録", width=10)
+        
+        submit = tk.Button(submit_frame, text="登録", width=10, command=self.add_data)
         submit.pack(pady=(30,5))
-            
+    
+    #閲覧ページ　最初の呼び出しはこのページ        
     def browse_data_window(self, username) -> None:
+        self.get_data(username)
         self.user_name = username
         menubar = tk.Menu(self.root)
         self.root.config(menu=menubar)
@@ -215,10 +263,6 @@ class Window():
         setting_menu.add_command(label="日報登録",command=self.open_add_inputdata)
         setting_menu.add_command(label="環境設定",command=self.open_setting)
         setting_menu.add_command(label="終了",command=self.quit_app)
-
-
-
-
 
         #閲覧ページ用フレームの作成
         title_frame = tk.Frame(self.root, pady=20)
@@ -272,10 +316,6 @@ class Window():
         self.tree.heading(4, text="経費")
         self.tree.heading(5, text="売上")
 
-            #ツリービューにデータの追加
-            # tree.insert("","end",values=("2023/6/24","食料品","4500"))
-            # tree.insert("","end",values=("2023/6/24","食料品","4500"))
-            # tree.insert("","end",values=("2023/6/24","食料品","4500"))
         for i in range(50):
             self.tree.insert("","end", values=("2023/6/26", "ＲＧ石城町", "1", "20,000", "50,000"))
 
@@ -284,8 +324,6 @@ class Window():
         scroll_v = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
         scroll_v.grid(row=0, column=1, sticky=tk.NS)
 
-        # scroll_h = ttk.Scrollbar(tree_frame, orient="horizontal", command=tree.xview)
-        # scroll_h.grid(row=1,column=0, sticky=tk.EW)
         self.tree.configure(yscrollcommand=scroll_v.set)
         self.tree.grid(row=0, column=0, sticky=tk.NSEW)
 

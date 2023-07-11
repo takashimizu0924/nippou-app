@@ -33,25 +33,6 @@ class App:
         window = Window(self.root)
         
         self.login = Login(self.root, window)
-        
-        # print(self.login.flag)
-        # # user = self.login.login_user()
-        # # print(user)
-        # self.login.input_widget()
-        # print("USERNAME->>",self.login._USER_NAME)
-        # if self.login.flag:
-        #     print("OK")
-        # window = Window(self.root, self.login._USER_NAME)
-        # window.browse_data_window()
-        # window.input_data_window()
-        
-        
-        # if self.login.flag == False:
-        #     self.login.input_widget()
-            # self.user_name =self.login.login()
-            # self.user_name = self.login
-            # window = Window(self.root, self.user_name)
-            # window.input_data_window()
              
         self.root.mainloop()
         
