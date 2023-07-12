@@ -1,9 +1,10 @@
+""" 基底クラス(ページクラス) """
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # アノテーション用パッケージ
 from __future__ import annotations
-from typing import (List, Tuple, Dict, Optional, Union)
+from typing import (Optional,)
 # tkinter
 from tkinter import Frame
 # 抽象クラス
@@ -25,7 +26,7 @@ class Base(metaclass = ABCMeta):
         self._page_name_tag: str = page_name_tag
         self._master_frame: Frame = master
         # ログマネージャインスタンス生成
-        self._log: LogManager = LogManager()
+        self._log: LogManager = LogManager(save_path='')
 
     def setup(self) -> None:
         """セットアップ

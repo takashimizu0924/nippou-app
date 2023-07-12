@@ -1,8 +1,9 @@
+""" ファイル管理 """
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # アノテーションパッケージ用
-from typing import Dict, List, Optional, Tuple, Union
+from typing import (Dict, List, Union)
 # ファイルパス存在確認用
 import os
 import json
@@ -14,7 +15,7 @@ class FileManager:
     """ファイル入出力管理クラス
     """
     def __init__(self) -> None:
-        self._ENCODE_TYPE: str = "utf-8"
+        self._encode_type: str = "utf-8"
 
     def read(self, file_path: str) -> List[str]:
         """ファイル読み込み
@@ -35,18 +36,24 @@ class FileManager:
 
         # 読み込みデータを確認
         try:
-            with open(file_path, "r", encoding = self._ENCODE_TYPE) as file:
+            with open(file_path, "r", encoding = self._encode_type) as file:
                 # splitで指定した改行コードを基準に配列化
                 _rsp = file.read().split('\n')
                 # 最後尾の空白文字を削除
                 del _rsp[-1]
                 print(_rsp)
-        
+
         # 読み込みを失敗した場合ここに入る
-        except Exception:
-            print(f"Error message: {traceback.format_exc()}")
+        except PermissionError as error_msg:
+            print(f"Error message: {error_msg}\n\
+                Traceback: {traceback.format_exc()}")
             return _rsp
-        
+
+        except FileNotFoundError  as error_msg:
+            print(f"Error message: {error_msg}\n\
+                Traceback: {traceback.format_exc()}")
+            return _rsp
+
         return _rsp
 
     def write(self, file_path: str, write_text_list: list) -> bool:
@@ -60,7 +67,7 @@ class FileManager:
         """
         # 書き込みデータを確認
         try:
-            with open(file_path, "a", encoding = self._ENCODE_TYPE) as file:
+            with open(file_path, "a", encoding = self._encode_type) as file:
                 # 空のデータを作成
                 _write_text_list = []
                 for data in write_text_list:
@@ -70,8 +77,9 @@ class FileManager:
                 file.writelines(_write_text_list)
 
         #書き込みを失敗した場合ここに入る
-        except Exception:
-            print(f"Error message: {traceback.format_exc()}")
+        except PermissionError as error_msg:
+            print(f"Error message: {error_msg}\n\
+                Traceback: {traceback.format_exc()}")
             return False
 
         return True
@@ -95,13 +103,19 @@ class FileManager:
 
         # 読み込みデータを確認
         try:
-            with open(json_file_path, "r") as json_file:
+            with open(json_file_path, "r", encoding = self._encode_type) as json_file:
                 # splitで指定した改行コードを基準に配列化
                 _rsp = json.load(json_file)
 
         # 読み込みを失敗した場合ここに入る
-        except Exception:
-            print(f"Error message: {traceback.format_exc()}")
+        except PermissionError as error_msg:
+            print(f"Error message: {error_msg}\n\
+                Traceback: {traceback.format_exc()}")
             return _rsp
-        
+
+        except FileNotFoundError  as error_msg:
+            print(f"Error message: {error_msg}\n\
+                Traceback: {traceback.format_exc()}")
+            return _rsp
+
         return _rsp

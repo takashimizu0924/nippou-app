@@ -1,9 +1,10 @@
+""" 共通パッケージ """
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # アノテーション用パッケージ
 from __future__ import annotations
-from typing import (List, Tuple, Dict, Optional, Union)
+from typing import (List)
 
 
 def check_arg_type(target: object, check_type: object) -> bool:
@@ -34,7 +35,7 @@ def check_args_type(target_list: List[object], check_type: object) -> bool:
     if len(target_list) <= 0:
         # チェック対象無し
         return False
-    
+
     ### 引数型チェック
     for arg in target_list:
         if not isinstance(arg, check_type):

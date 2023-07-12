@@ -1,12 +1,14 @@
+""" アプリケーションデータ管理 """
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # アノテーション用パッケージ
 from __future__ import annotations
 from typing import (List, Dict, Union)
+from dataclasses import dataclass
+from pkg_common.log_manager import LogManager
 # データベース制御パッケージ
 from pkg_db.database import (TableDataType, DatabaseRetCode, Database)
-
 
 class DataManager:
     """アプリケーションデータ制御クラス
@@ -16,6 +18,8 @@ class DataManager:
         """コンストラクタ
             NOTE: データベースの初期化処理を行う
         """
+        # ログマネージャ生成
+        self.log: LogManager = LogManager(save_path='')
         # データベース作成 (※NOTE:既にDBが存在する場合は接続)
         _database_name: str = "nippo_app"
         self._db_ctrl = Database(_database_name)
@@ -29,11 +33,12 @@ class DataManager:
             print(f"create_table ret = {ret}")
             # 戻り値チェック
             if not ret == DatabaseRetCode.SUCCESS:
-                raise Exception()
-            
-        except Exception:
+                raise ValueError('[DataManager:__init__] -> target tabel is already exists. \
+                    prosessing is SUCCESS.')
+
+        except ValueError as error_msg:
             # 既に作成されているテーブルを指定した場合はSUCCESSを表示
-            print(f"target table is already exists. processing is SUCCESS")
+            self.log.info(f'{error_msg}')
 
     def register(self, req: DataRegistReq) -> bool:
         """データ登録
@@ -46,13 +51,13 @@ class DataManager:
         """
         ## 応答生成
         _rsp: bool = False
-        
+
         ## 引数チェック
         if req is None:
             # エラー応答
-            print(f"register:[AppDataControl Class]-> Error occured. Request parameter is none.")
+            self.log.error('[DataManager:register] -> Error occured. Request parameter is none.')
             return _rsp
-        
+
         ## 要求生成
         _req: dict = {
             "WORK_DATE": req.work_date,
@@ -70,9 +75,9 @@ class DataManager:
 
         # 戻り値チェック
         if not ret == DatabaseRetCode.SUCCESS:
-            print(f"register:[AppDataControl Class]-> Error occured. Register data failed.")
+            self.log.error('[DataManager:register] -> Error occured. Register data failed.')
             return _rsp
-        
+
         # 応答設定(正常)
         _rsp = True
         return _rsp
@@ -88,11 +93,11 @@ class DataManager:
         """
         ## 応答生成
         _rsp: bool = False
-        
+
         ## 引数チェック
         if req is None:
             # エラー応答
-            print(f"update:[AppDataControl Class]-> Error occured. Request parameter is none.")
+            self.log.error('[DataManager:update] -> Error occured. Request parameter is none.')
             return _rsp
 
         ## データ登録実行
@@ -100,9 +105,9 @@ class DataManager:
 
         # 戻り値チェック
         if not ret == DatabaseRetCode.SUCCESS:
-            print(f"update:[AppDataControl Class]-> Error occured. Update data failed.")
+            self.log.error('[DataManager:update] -> Error occured. Update data failed.')
             return _rsp
-        
+
         # 応答設定(正常)
         _rsp = True
         return _rsp
@@ -118,11 +123,11 @@ class DataManager:
         """
         ## 応答生成
         _rsp: bool = False
-        
+
         ## 引数チェック
         if req is None:
             # エラー応答
-            print(f"delete:[AppDataControl Class]-> Error occured. Request parameter is none.")
+            self.log.error('[DataManager:delete] -> Error occured. Request parameter is none.')
             return _rsp
 
         ## データ登録実行
@@ -130,9 +135,9 @@ class DataManager:
 
         # 戻り値チェック
         if not ret == DatabaseRetCode.SUCCESS:
-            print(f"delete:[AppDataControl Class]-> Error occured. Delete data failed.")
+            self.log.error('[DataManager:delete] -> Error occured. Delete data failed.')
             return _rsp
-        
+
         # 応答設定(正常)
         _rsp = True
         return _rsp
@@ -149,21 +154,21 @@ class DataManager:
         """
         ## 応答用配列生成
         _rsp_list: List[DataFetchRsp] = []
-        
+
         ## 引数チェック
         if req is None:
             # エラー応答
-            print(f"fetch:[AppDataControl Class]-> Error occured. Request parameter is none.")
-            return _rsp
-        
+            self.log.error('[DataManager:fetch] -> Error occured. Request parameter is none.')
+            return _rsp_list
+
         ## 要求辞書データ作成
         _req: dict = {}
-        if 0 < req.id:
+        if 0 < req.target_id:
             _req = {
-                "ID": req.id,
+                "target_id": req.target_id,
                 "COMPANY_NAME": req.company_name
             }
-        elif req.id == 0:
+        elif req.target_id == 0:
             _req = {
                 "COMPANY_NAME": req.company_name
             }
@@ -173,7 +178,7 @@ class DataManager:
 
         # 戻り値チェック
         if not ret_code == DatabaseRetCode.SUCCESS:
-            print(f"fetch:[AppDataControl Class]-> Error occured. Fetch data failed.")
+            self.log.error('[DataManager:fetch] -> Error occured. Fetch data failed.')
             return _rsp_list
 
         # 応答解析
@@ -181,7 +186,7 @@ class DataManager:
             # 応答生成
             _rsp: DataFetchRsp = DataFetchRsp()
             # 応答データ設定
-            _rsp.id                 = _fetch_data[0]
+            _rsp.target_id          = _fetch_data[0]
             _rsp.work_date          = _fetch_data[1]
             _rsp.company_name       = _fetch_data[2]
             _rsp.work_place         = _fetch_data[3]
@@ -194,7 +199,7 @@ class DataManager:
             _rsp_list.append(_rsp)
 
         return _rsp_list
-    
+
     def terminate(self) -> None:
         """終了処理
         """
@@ -202,106 +207,94 @@ class DataManager:
         return
 
 
+@dataclass
 class AppConfig:
     """アプリ用設定データクラス
+        NOTE: 引数説明
+        - db_table_data_dict    : データベース設定用辞書データ NOTE:カラム情報
     """
-    def __init__(self) -> None:
-        """コンストラクタ
-            NOTE: 引数説明
-            - db_table_data_dict    : データベース設定用辞書データ NOTE:カラム情報
-        """
-        self.db_table_data_dict: Dict[str, TableDataType] = {
-            "ID": (f"{TableDataType.INT} {TableDataType.PRIMARY_KEY} {TableDataType.AUTO_INC}"),
-            "WORK_DATE": TableDataType.STR,
-            "COMPANY_NAME": TableDataType.STR,
-            "WORK_PLACE": TableDataType.STR,
-            "WORK_CONTENTS": TableDataType.STR,
-            "WORKER_NUM": TableDataType.INT,
-            "WORKER_COST": TableDataType.INT,
-            "MATERIAL_COST": TableDataType.INT,
-            "PROCEEDS": TableDataType.INT,
-        }
+    db_table_data_dict: Dict[str, TableDataType] = {
+        "target_id": (f"{TableDataType.INT} {TableDataType.PRIMARY_KEY} {TableDataType.AUTO_INC}"),
+        "WORK_DATE": TableDataType.STR,
+        "COMPANY_NAME": TableDataType.STR,
+        "WORK_PLACE": TableDataType.STR,
+        "WORK_CONTENTS": TableDataType.STR,
+        "WORKER_NUM": TableDataType.INT,
+        "WORKER_COST": TableDataType.INT,
+        "MATERIAL_COST": TableDataType.INT,
+        "PROCEEDS": TableDataType.INT,
+    }
 
+@dataclass
 class DataRegistReq:
     """データ登録制御 要求クラス
+        NOTE: 引数説明
+        - work_date     : 工事日データ NOTE:(YYYY/MM/DDの形式) 
+        - company_name  : 会社名データ
+        - work_place    : 現場名データ
+        - work_contents : 作業内容データ
+        - worker_num    : 作業員数データ
+        - worker_cost   : 作業員代データ
+        - material_cost : 材料費データ
+        - proceeds      : 売上金額データ
     """
-    def __init__(self) -> None:
-        """コンストラクタ
-            NOTE: 引数説明
-            - work_date     : 工事日データ NOTE:(YYYY/MM/DDの形式) 
-            - company_name  : 会社名データ
-            - work_place    : 現場名データ
-            - work_contents : 作業内容データ
-            - worker_num    : 作業員数データ
-            - worker_cost   : 作業員代データ
-            - material_cost : 材料費データ
-            - proceeds      : 売上金額データ
-        """
-        self.work_date: str     = ""
-        self.company_name: str  = ""
-        self.work_place: str    = ""
-        self.work_contents: str = ""
-        self.worker_num: int    = 0
-        self.worker_cost: int   = 0
-        self.material_cost: int = 0
-        self.proceeds: int      = 0
+    work_date: str     = ""
+    company_name: str  = ""
+    work_place: str    = ""
+    work_contents: str = ""
+    worker_num: int    = 0
+    worker_cost: int   = 0
+    material_cost: int = 0
+    proceeds: int      = 0
 
+@dataclass
 class DataUpdateReq:
     """データ更新制御 要求クラス
+        NOTE: 引数説明
+        - target_id     : 更新対象IDデータ
+        - update_data   : 更新データ ※NOTE: キーは必ず更新対象のカラム名を指定すること
     """
-    def __init__(self) -> None:
-        """コンストラクタ
-            NOTE: 引数説明
-            - target_id     : 更新対象IDデータ
-            - update_data   : 更新データ ※NOTE: キーは必ず更新対象のカラム名を指定すること
-        """
-        self.target_id: int                             = 0
-        self.update_data: Dict[str, Union[int, str]]    = {}
+    target_id: int                          = 0
+    update_data: Dict[str, Union[int, str]] = {}
 
+@dataclass
 class DataDeleteReq:
     """データ削除制御 要求クラス
+        NOTE: 引数説明
+        - target_id: 削除対象IDデータ
     """
-    def __init__(self) -> None:
-        """コンストラクタ
-            NOTE: 引数説明
-            - target_id: 削除対象IDデータ
-        """
-        self.target_id: int = 0
+    target_id: int = 0
 
+@dataclass
 class DataFetchReq:
     """データ取得制御 要求クラス
+        NOTE: 引数説明
+        - target_id            : IDデータ
+        - company_name  : 会社名データ
     """
-    def __init__(self) -> None:
-        """コンストラクタ
-            NOTE: 引数説明
-            - id            : IDデータ
-            - company_name  : 会社名データ
-        """
-        self.id: int            = 0
-        self.company_name: str  = ""
+    target_id: int      = 0
+    company_name: str   = ""
 
+@dataclass
 class DataFetchRsp:
     """データ取得制御 応答クラス
+        NOTE: 引数説明
+        - target_id            : IDデータ
+        - work_date     : 工事日データ NOTE:(YYYY/MM/DDの形式) 
+        - company_name  : 会社名データ
+        - work_place    : 現場名データ
+        - work_contents : 作業内容データ
+        - worker_num    : 作業員数データ
+        - worker_cost   : 作業員代データ
+        - material_cost : 材料費データ
+        - proceeds      : 売上金額データ
     """
-    def __init__(self) -> None:
-        """コンストラクタ
-            NOTE: 引数説明
-            - id            : IDデータ
-            - work_date     : 工事日データ NOTE:(YYYY/MM/DDの形式) 
-            - company_name  : 会社名データ
-            - work_place    : 現場名データ
-            - work_contents : 作業内容データ
-            - worker_num    : 作業員数データ
-            - worker_cost   : 作業員代データ
-            - material_cost : 材料費データ
-            - proceeds      : 売上金額データ
-        """
-        self.id: int            = ""
-        self.work_date: str     = ""
-        self.company_name: str  = ""
-        self.work_place: str    = ""
-        self.work_contents: str = ""
-        self.worker_num: int    = 0
-        self.worker_cost: int   = 0
-        self.material_cost: int = 0
-        self.proceeds: int      = 0
+    target_id: int      = 0
+    work_date: str      = ""
+    company_name: str   = ""
+    work_place: str     = ""
+    work_contents: str  = ""
+    worker_num: int     = 0
+    worker_cost: int    = 0
+    material_cost: int  = 0
+    proceeds: int       = 0

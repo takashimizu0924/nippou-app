@@ -1,24 +1,27 @@
+""" ログ管理 """
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import logging
+from dataclasses import dataclass
 from pkg_common.file_manager import FileManager
 
+@dataclass
 class LogLevel:
     """ログレベルデータ型クラス
     """
     # NOTE:ロガーに設定したロギングレベルより以下のログは出力されない
-    NOTSET: str     = logging.NOTSET
-    DEBUG: str      = logging.DEBUG
-    INFO: str       = logging.INFO
-    WARNING: str    = logging.WARNING
-    ERROR: str      = logging.ERROR
-    CRITICAL: str   = logging.CRITICAL
+    notset: str     = logging.NOTSET
+    debug: str      = logging.DEBUG
+    info: str       = logging.INFO
+    warning: str    = logging.WARNING
+    error: str      = logging.ERROR
+    critical: str   = logging.CRITICAL
 
 class LogManager:
     """ログデータ制御クラス
     """
-    def __init__(self, save_path: str = '', level: LogLevel = LogLevel.DEBUG) -> None:
+    def __init__(self, save_path: str = '', level: LogLevel = LogLevel.debug) -> None:
         """コンストラクタ
 
         Args:
@@ -34,57 +37,60 @@ class LogManager:
             file_mng: FileManager = FileManager()
             ## 設定ファイル読み込み
             config_data: dict = file_mng.json_read(config_file_path)
-            
+
             ### プロジェクト設定情報
             project_dir_path: str = config_data["PROJECT_DIR_PATH"]
-            
+
             ### ログマネージャ生成
             log_config: dict = config_data["LOG"]
-            _save_path = f'{project_dir_path}{log_config["SAVE_PATH"]}{log_config["SAVE_FILE_NAME"]}'
+            _save_path = f'{project_dir_path}{log_config["SAVE_PATH"]}\
+                {log_config["SAVE_FILE_NAME"]}'
 
         # ロガーの名前設定
         self.logger = logging.getLogger("nippou_app")
         self.logger.setLevel(level)
-        fh = self._file_handler(_save_path, level)
-        ch = self._console_handler(level)
+        file_handler = self._create_file_handler(_save_path, level)
+        console_handler = self._create_console_handler(level)
 
-        self.logger.addHandler(fh)
-        self.logger.addHandler(ch)
-    
-    def _file_handler(self, save_path:str, level:LogLevel) -> logging.FileHandler:
+        self.logger.addHandler(file_handler)
+        self.logger.addHandler(console_handler)
+
+    def _create_file_handler(self, save_path:str, level:LogLevel) -> logging.FileHandler:
         """ファイルハンドラーをロギングインスタンスに設定
 
         Args:
             logfile_name (str): 出力するファイル名
             level (LogLevel): ログレベル
         """
-        fh = logging.FileHandler(save_path)
+        file_handler = logging.FileHandler(save_path)
         # ログレベルの設定
-        fh.setLevel(level)
+        file_handler.setLevel(level)
         # フォーマッタの定義
-        fh_fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %T%H:%M:%S")
-        fh.setFormatter(fh_fmt)
+        fh_fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", \
+            "%Y-%m-%d %T%H:%M:%S")
+        file_handler.setFormatter(fh_fmt)
         # # フォーマッタをハンドラに紐づける
-        self.logger.addHandler(fh)
-        return fh
-    
-    def _console_handler(self, level:LogLevel) -> logging.StreamHandler:
+        self.logger.addHandler(file_handler)
+        return file_handler
+
+    def _create_console_handler(self, level:LogLevel) -> logging.StreamHandler:
         """コンソールハンドラーをロギングインスタンスに設定
 
         Args:
             level (LogLevel): ログレベル
         """
         # コンソールに標準出力設定
-        ch = logging.StreamHandler()
+        console_handler = logging.StreamHandler()
         # ログレベルの設定
-        ch.setLevel(level)
+        console_handler.setLevel(level)
         # フォーマッタの定義
-        ch_fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", "%Y-%m-%d %T%H:%M:%S")
-        ch.setFormatter(ch_fmt)
+        ch_fmt = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s", \
+            "%Y-%m-%d %T%H:%M:%S")
+        console_handler.setFormatter(ch_fmt)
         # # フォーマッタをハンドラに紐づける
-        self.logger.addHandler(ch)
-        return ch
-    
+        self.logger.addHandler(console_handler)
+        return console_handler
+
     def debug(self, text: str) -> None:
         """debugレベルのログ出力
 
@@ -92,8 +98,7 @@ class LogManager:
             text (str): 出力するログテキスト
         """
         self.logger.debug(text)
-        return
-    
+
     def info(self, text: str) -> None:
         """infoレベルのログ出力
 
@@ -101,8 +106,7 @@ class LogManager:
             text (str): 出力するログテキスト
         """
         self.logger.info(text)
-        return
-    
+
     def warning(self, text: str) -> None:
         """warningレベルのログ出力
 
@@ -110,7 +114,6 @@ class LogManager:
             text (str): 出力するログテキスト
         """
         self.logger.warning(text)
-        return
 
     def error(self, text: str) -> None:
         """errorレベルのログ出力
@@ -119,8 +122,7 @@ class LogManager:
             text (str): 出力するログテキスト
         """
         self.logger.error(text)
-        return
-    
+
     def critical(self, text: str) -> None:
         """criticalレベルのログ出力
 
@@ -128,12 +130,3 @@ class LogManager:
             text (str): 出力するログテキスト
         """
         self.logger.critical(text)
-        return
-
-
-# if __name__ == '__main__':
-#     # お試しの場合はここに追加
-#     log_ctrl = LogManager()
-
-#     #log出力のテスト
-#     log_ctrl.debug("this is test3")
