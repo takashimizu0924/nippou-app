@@ -41,8 +41,10 @@ class App:
         # タイトル文字設定
         self.root.title(self._app_window_title)
         # 画面サイズ設定
-        self.root.geometry(f"{self._app_window_width}x{self._app_window_height}+\
-            {self._app_window_pos_x}+{self._app_window_pos_y}")
+        _window_size: str = f'{self._app_window_width}x{self._app_window_height}'
+        _window_pos: str = f'{self._app_window_pos_x}+{self._app_window_pos_y}'
+        # ジオメトリ設定
+        self.root.geometry(f"{_window_size}+{_window_pos}")
         # 画面リサイズ設定
         self.root.resizable(width=self._app_window_resize_x, height=self._app_window_resize_y)
 
