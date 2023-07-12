@@ -158,7 +158,7 @@ class DatabaseControl:
         return DatabaseRetCode.SUCCESS, res_list
         
     
-    def fetch_data(self, table_name: str) -> list:
+    def fetch_data(self, table_name: str) -> str:
         """ユーザーのデータを全て取得
 
         Args:
@@ -167,7 +167,6 @@ class DatabaseControl:
         Returns:
             list: 取得したデータのリスト
         """
-        print(f"{table_name},koko")
         if table_name == "":
             return DatabaseRetCode.DB_CREATE_TABLE_ERROR
         
