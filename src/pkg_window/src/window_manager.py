@@ -4,13 +4,13 @@
 
 # アノテーション用パッケージ
 from __future__ import annotations
-from typing import (List, Tuple, Dict, Optional, Union)
+from typing import (Dict, Optional)
 # ログ用パッケージ
 from pkg_common.log_manager import LogManager
 # 内部共通パッケージ
-from pkg_common import check_arg_type, check_args_type
+from pkg_common.common import check_arg_type, check_args_type
 # ウィンドウモジュールのベースウィンドウクラス
-from window import Base
+from .window import Base
 
 class WindowManager:
     """ウィンドウ管理クラス
@@ -171,7 +171,8 @@ class WindowManager:
 
         except ValueError as error_msg:
             ## 失敗: 存在しないウィンドウへの参照エラー
-            self._log.error(f'{self._log_header}change: does not exists target window name in buffer. target window name: {window_name_tag}, Error: {error_msg}')
+            e_msg: str = f'{self._log_header}change: does not exists target window name in buffer.'
+            self._log.error(f'{e_msg} target window name: {window_name_tag}, Error: {error_msg}')
 
         # 結果応答
         return _rsp
