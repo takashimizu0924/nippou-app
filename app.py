@@ -16,13 +16,7 @@ class App:
         self._APP_POSITION_X: int = 400
         self._APP_POSITION_Y: int = 150
         self._RESIZE_WINDOW_X: bool = False
-        self._RESIZE_WINDOW_Y: bool = False
-        
-        self._INPUT_DATA_TITLE: str = "日報入力"
-        self._INPUT_DATA_WIDTH: int = 750
-        self._INPUT_DATA_HEIGHT: int = 450
-        self._INPUT_DATA_POSITION_X: int = 520
-        self._INPUT_DATA_POSITION_Y: int = 250
+        self._RESIZE_WINDOW_Y: bool = False 
         
     
     def start(self):

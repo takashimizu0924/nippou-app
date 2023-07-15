@@ -46,8 +46,13 @@ class Login:
         self.login_button.grid(row=4, column=0, columnspan=2)
     #ユーザー登録
     def add_user_widget(self) -> None:
+        
         self.add_user_frame = tk.Frame(self.root)
         self.add_user_frame.pack()
+        
+        self.input_title_label = tk.Label(self.add_user_frame, text="新規登録", font=("", 15, "bold"))
+        self.input_title_label.grid(row=0, column=0, columnspan=2, pady=(30, 30))
+        
         #会社名入力用
         self.company_name_label = tk.Label(self.add_user_frame, text="会社名")
         self.company_name_label.grid(row=1, column=0, pady=(10, 20))
@@ -63,38 +68,62 @@ class Login:
         self.password_entry.grid(row=3, column=1, pady=(10, 20))
         
         #登録ボタン
-        self.login_button = tk.Button(self.add_user_frame, text="登録", command=self.__add_user)
+        self.login_button = tk.Button(self.add_user_frame, text="登録", command=self.add)
         self.login_button.grid(row=4, column=0, columnspan=2)
     
     def __login_check(self, company_name, user_name, password) -> bool:
         """データベースに登録情報があるか確認
         """
         user_list = self.db_ctr.fetch_user(company_name, user_name, password)
+        _, user_from_company = self.db_ctr.fetch_select_company(company_name)
+
+        for user in user_from_company:
+            if user[2] == user_name:
+                messagebox.showinfo("確認", "すでに同じ名前で登録されています")
+                return
         if user_list[1] == []:
             messagebox.showinfo("確認", "未登録なのでそのまま登録してください")
-            self.login_button.config(text="登録", command=self.__add_user(company_name, user_name, password))
-            return True
+            # self.login_frame.destroy()
+            # self.add_user_widget()
+            # self.login_button.config(text="登録", command=self.__add_user(company_name, user_name, password))
+            return False
+        
         return True
         
-    def __add_user(self, company_name, user_name, user_password):
-        code, res = self.db_ctr.fetch_user_all()
-        check = True
-        
-        if code == 0:
-            print("start")
-            for r in res:
-                if r[1] == company_name:
-                    for v in res:
-                        if v[2] == user_name:
-                            check = False
-                            break
-        if not check:
-            messagebox.showinfo("確認", "同じ会社名とユーザー名が存在します。\nパスワードを確認してください") 
-            self.input_login_widget()       
-        else:
-            self.db_ctr.insert_user(company_name, user_name, user_password)        
-        # self.db_ctr.insert_user(company_name, user_name, user_password)
+    def __add_check(self, company_name, user_name) -> bool:
+        _, user = self.db_ctr.fetch_select_company(company_name)
+        print(len(user))
+        print(company_name, user_name)
+        if len(user) == 0:
+            return True
+        for user in user:
+            if user[2] == user_name:
+                return False
+            elif not user:
+                return True
+            else:
+                return True
+        return False    
     
+    def add(self) -> None:
+        self._COMPANY_NAME = self.company_name_entry.get()
+        self._USER_NAME = self.user_name_entry.get()
+        self._USER_PASSWORD = self.password_entry.get()
+
+        if self._COMPANY_NAME == "" or self._USER_NAME == "" or self._USER_PASSWORD == "":
+            messagebox.showwarning("警告", "入力内容に不備があります。\nすべての項目を入力してください")
+            return
+        if self.__add_check(self._COMPANY_NAME, self._USER_NAME):
+            self.db_ctr.insert_user(self._COMPANY_NAME, self._USER_NAME, self._USER_PASSWORD)
+            messagebox.showinfo("確認", "登録完了")
+            self.add_user_frame.destroy()
+            tablename = self._COMPANY_NAME + self._USER_NAME
+            self.db_ctr.create_data_table(table_name = tablename)
+            self.main_window.browse_data_window(self._COMPANY_NAME, self._USER_NAME)   
+            
+        elif not self.__add_check(self._COMPANY_NAME, self._USER_NAME):
+            messagebox.showinfo("確認", "すでに同じ名前で登録されています")
+            return
     def login(self) -> None:
         """ログインを実行する
         ログイン完了後閲覧ページに遷移
@@ -106,15 +135,16 @@ class Login:
         
         if self._COMPANY_NAME == "" or self._USER_NAME == "" or self._USER_PASSWORD == "":
             messagebox.showwarning("警告", "入力内容に不備があります。\nすべての項目を入力してください")
-        
         else:
             r = self.__login_check(self._COMPANY_NAME, self._USER_NAME, self._USER_PASSWORD)
             if r :
                 self.login_frame.destroy()
                 self.db_ctr.create_data_table(self._USER_NAME)
                 self.main_window.browse_data_window(self._USER_NAME)
-    
-    
+            else:
+                self.login_frame.destroy()
+                self.add_user_widget()
+                
     def login_user(self) -> str:
         return self._USER_NAME 
         # self.window = Window(self.root, self._USER_NAME)

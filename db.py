@@ -157,7 +157,26 @@ class DatabaseControl:
         
         return DatabaseRetCode.SUCCESS, res_list
         
-    
+    def fetch_select_company(self, company_name) -> list:
+        """会社名からユーザーを取得
+
+        Args:
+            companyname (_type_): _description_
+
+        Returns:
+            list: _description_
+        """
+        table_name: str = "user"
+        #実行用sql文を作成
+        _sql: str = f"SELECT * FROM {table_name} WHERE company_name = '{company_name}'"
+        
+        #実行用sql文を実行
+        self.__execute(_sql)
+        
+        res_list = self._cur.fetchall()
+        
+        return DatabaseRetCode.SUCCESS, res_list
+        
     def fetch_data(self, table_name: str) -> str:
         """ユーザーのデータを全て取得
 

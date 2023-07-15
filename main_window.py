@@ -54,9 +54,10 @@ class Window():
         label2.pack()
     
     #Userの登録データを取得
-    def get_data(self, username) -> str:
+    def get_data(self, companyname, username) -> str:
         db_ctr = DatabaseControl()
-        _, data_list = db_ctr.fetch_data(username)
+        tablename = companyname + username
+        _, data_list = db_ctr.fetch_data(tablename)
         return data_list
     
     #Userの入力データを登録
@@ -240,8 +241,8 @@ class Window():
         submit.pack(pady=(30,5))
     
     #閲覧ページ　最初の呼び出しはこのページ        
-    def browse_data_window(self, username) -> None:
-        _data = self.get_data(username)
+    def browse_data_window(self, companyname, username) -> None:
+        _data = self.get_data(companyname, username)
         for data in _data:
             print(data)
         self.user_name = username
