@@ -21,6 +21,7 @@ class Base(metaclass = ABCMeta):
 
         Args:
             window_name_tag (str): ウィンドウ名タグ文字列
+            master (Optional[Frame]): tkinterのフレームオブジェクト
         """
         # ウィンドウ情報生成
         self._window_name_tag: str = window_name_tag
