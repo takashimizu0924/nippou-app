@@ -76,7 +76,6 @@ class DatabaseControl:
         _sql: str = f"CREATE TABLE IF NOT EXISTS {table_name}(id INTEGER PRIMARY KEY AUTOINCREMENT, user_name TEXT, workdate DATETIME, company_name TEXT, work_place TEXT, work_detail TEXT, worker INTEGER, worker_cost INTEGER, material_cost INTEGER, sales INTEGER)"
         
         #実行用sql文を実行
-        print(_sql)
         self.__execute(_sql)
         
         self.__commit()
@@ -96,6 +95,7 @@ class DatabaseControl:
         _sql: str = f"INSERT INTO user (company_name, user_name, password)VALUES ('{company_name}','{user_name}','{password}')"
         self.__execute(_sql)
         self.__commit()
+        
     def insert_data(self, user_name: str, date: str, company_name: str,work_place: str, work_detail: str, worker: int, worker_cost: int, material_cost: int, sales: int) -> None:
         """データ挿入
 
@@ -199,6 +199,11 @@ class DatabaseControl:
         print(f"fetch_dataで取得したデータ--->{res_list}")
         
         return DatabaseRetCode.SUCCESS, res_list
-        
+    
+    def update_data(self, table_name: str, target_id: int) -> list:
+        return DatabaseRetCode.SUCCESS
+    
+    def delete_data(self, table_name: str, target_id: int) -> list:
+        return DatabaseRetCode.SUCCESS    
         
         

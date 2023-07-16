@@ -75,13 +75,6 @@ class Login:
         """データベースに登録情報があるか確認
         """
         user_list = self.db_ctr.fetch_user(company_name, user_name, password)
-        # _, user_from_company = self.db_ctr.fetch_select_company(company_name)
-        print(user_list)
-        # for user in user_from_company:
-        #     if user[2] == user_name:
-        #         messagebox.showinfo("確認", "すでに同じ名前で登録されています")
-        #         return
-        
         #ユーザーリストにデータがない場合登録画面に遷移させるための返り値を返す
         if user_list[1] == []:
             messagebox.showinfo("確認", "未登録なのでそのまま登録してください")
@@ -94,18 +87,15 @@ class Login:
         
     def __add_check(self, company_name, user_name) -> bool:
         _, user = self.db_ctr.fetch_select_company(company_name)
-        print(len(user))
-        print(company_name, user_name)
+
         if len(user) == 0:
             return True
         for user in user:
             if user[2] == user_name:
                 return False
-            elif not user:
-                return True
             else:
                 return True
-        return False    
+        return False
     
     def add(self) -> None:
         self._COMPANY_NAME = self.company_name_entry.get()
@@ -120,7 +110,7 @@ class Login:
             messagebox.showinfo("確認", "登録完了")
             self.add_user_frame.destroy()
             tablename = self._COMPANY_NAME + self._USER_NAME
-            self.db_ctr.create_data_table(table_name = tablename)
+            self.db_ctr.create_data_table(tablename)
             self.main_window.browse_data_window(self._COMPANY_NAME, self._USER_NAME)   
             
         elif not self.__add_check(self._COMPANY_NAME, self._USER_NAME):
