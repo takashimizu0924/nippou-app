@@ -62,7 +62,7 @@ class Window():
     
     #Userの入力データを登録
     def add_data(self):
-        user_name = self.user_name
+        table_name = self.user_name + self.company_name
         work_date = self.date_label_entry.get()
         company_name = self.company_entry.get()
         work_place = self.workplace_entry.get()
@@ -72,7 +72,7 @@ class Window():
         material_cost = self.materialcost_entry.get()
         sales = self.sales_entry.get()
         
-        self.data_dict["user_name"] = user_name
+        self.data_dict["user_name"] = self.user_name
         self.data_dict["work_date"] = work_date
         self.data_dict["company_name"] = company_name
         self.data_dict["work_place"] = work_place
@@ -82,7 +82,7 @@ class Window():
         self.data_dict["material_cost"] = int(material_cost)
         self.data_dict["sales"] = int(sales)
         db_ctr = DatabaseControl()
-        db_ctr.insert_data(user_name, work_date, company_name, work_place, work_detail, int(worker), int(worker_cost), int(material_cost), int(sales))
+        db_ctr.insert_data(table_name, work_date, company_name, work_place, work_detail, int(worker), int(worker_cost), int(material_cost), int(sales))
         self.subwindow.destroy()
            
     #アプリを終了する関数
@@ -246,6 +246,7 @@ class Window():
         for data in _data:
             print(data)
         self.user_name = username
+        self.company_name = companyname
         menubar = tk.Menu(self.root)
         self.root.config(menu=menubar)
 

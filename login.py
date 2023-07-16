@@ -75,12 +75,14 @@ class Login:
         """データベースに登録情報があるか確認
         """
         user_list = self.db_ctr.fetch_user(company_name, user_name, password)
-        _, user_from_company = self.db_ctr.fetch_select_company(company_name)
-
-        for user in user_from_company:
-            if user[2] == user_name:
-                messagebox.showinfo("確認", "すでに同じ名前で登録されています")
-                return
+        # _, user_from_company = self.db_ctr.fetch_select_company(company_name)
+        print(user_list)
+        # for user in user_from_company:
+        #     if user[2] == user_name:
+        #         messagebox.showinfo("確認", "すでに同じ名前で登録されています")
+        #         return
+        
+        #ユーザーリストにデータがない場合登録画面に遷移させるための返り値を返す
         if user_list[1] == []:
             messagebox.showinfo("確認", "未登録なのでそのまま登録してください")
             # self.login_frame.destroy()
@@ -132,6 +134,7 @@ class Login:
         self._COMPANY_NAME = self.company_name_entry.get()
         self._USER_NAME = self.user_name_entry.get()
         self._USER_PASSWORD = self.password_entry.get()
+        table_name = self._COMPANY_NAME + self._USER_NAME
         
         if self._COMPANY_NAME == "" or self._USER_NAME == "" or self._USER_PASSWORD == "":
             messagebox.showwarning("警告", "入力内容に不備があります。\nすべての項目を入力してください")
@@ -139,8 +142,8 @@ class Login:
             r = self.__login_check(self._COMPANY_NAME, self._USER_NAME, self._USER_PASSWORD)
             if r :
                 self.login_frame.destroy()
-                self.db_ctr.create_data_table(self._USER_NAME)
-                self.main_window.browse_data_window(self._USER_NAME)
+                self.db_ctr.create_data_table(table_name)
+                self.main_window.browse_data_window(self._COMPANY_NAME,self._USER_NAME)
             else:
                 self.login_frame.destroy()
                 self.add_user_widget()
