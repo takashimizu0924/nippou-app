@@ -211,7 +211,7 @@ class Window():
         self.sales_entry.grid(row=5, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
         
         
-        submit = tk.Button(self.input_submit_frame, text="登録", width=10, command=self.update_data)
+        submit = tk.Button(self.input_submit_frame, text="登録", width=10, command=self.add_data)
         submit.pack(pady=(30,5))
         
     #編集ページ
@@ -278,7 +278,7 @@ class Window():
         self.sales_entry.insert(0, selected_data[8])
         
         
-        submit = tk.Button(submit_frame, text="登録", width=10, command=self.add_data)
+        submit = tk.Button(submit_frame, text="登録", width=10, command=self.update_data)
         submit.pack(pady=(30,5))
     
     #閲覧ページ　最初の呼び出しはこのページ        
