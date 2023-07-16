@@ -211,7 +211,7 @@ class Window():
         self.sales_entry.grid(row=5, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
         
         
-        submit = tk.Button(self.input_submit_frame, text="登録", width=10, command=self.add_data)
+        submit = tk.Button(self.input_submit_frame, text="登録", width=10, command=self.update_data)
         submit.pack(pady=(30,5))
         
     #編集ページ
