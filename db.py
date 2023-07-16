@@ -110,7 +110,7 @@ class DatabaseControl:
 
         # 挿入対象データ
         target_data_value: str = f'(\
-            \'{target_data_dict["date"]}\',\'{target_data_dict["company_name"]}\',\
+            \'{target_data_dict["work_date"]}\',\'{target_data_dict["company_name"]}\',\
             \'{target_data_dict["work_place"]}\',\'{target_data_dict["work_detail"]}\',\
             \'{target_data_dict["worker"]}\',\'{target_data_dict["worker_cost"]}\',\
             \'{target_data_dict["material_cost"]}\',\'{target_data_dict["sales"]}\'\
