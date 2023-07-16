@@ -243,7 +243,7 @@ class DatabaseControl:
         _query = _query.rstrip(',')
 
         # 実行用sqlを生成
-        _sql: str = f'UPDATE {table_name} SET {_query} WHERE target_id = {target_id}'
+        _sql: str = f'UPDATE {table_name} SET {_query} WHERE id = {target_id}'
         # クエリを実行
         self.__execute(_sql)
         # 変更を適用する
@@ -267,7 +267,7 @@ class DatabaseControl:
             return
 
         # クエリ生成
-        _sql: str = f'DELETE FROM {table_name} WHERE target_id = {target_id}'
+        _sql: str = f'DELETE FROM {table_name} WHERE id = {target_id}'
         # クエリ実行
         self.__execute(_sql)
         # 変更を適用する
