@@ -96,25 +96,33 @@ class DatabaseControl:
         self.__execute(_sql)
         self.__commit()
         
-    def insert_data(self, user_name: str, date: str, company_name: str,work_place: str, work_detail: str, worker: int, worker_cost: int, material_cost: int, sales: int) -> None:
+    def insert_data(self, tabele_name: str, target_data_dict: dict) -> None:
         """データ挿入
 
         Args:
-            date (str): _description_
-            company_name (str): _description_
-            work_place (str): _description_
-            work_detail (str): _description_
-            worker (int): _description_
-            worker_cost (int): _description_
-            material_cost (int): _description_
-            sales (int): _description_
+            tabele_name (str): テーブル名
+            target_data_dict (dict): 挿入対象データ
         """
-        _sql: str = f"INSERT INTO '{user_name}' (user_name, workdate, company_name, work_place, work_detail, worker, worker_cost, material_cost, sales)VALUES ('{user_name}','{date}','{company_name}','{work_place}','{work_detail}','{worker}', '{worker_cost}', '{material_cost}', '{sales}')"
-        
+        ### クエリに挿入するデータ)生成
+        # 挿入対象キー
+        target_data_key: str = '(workdate, company_name, work_place, \
+            work_detail, worker, worker_cost, material_cost, sales)'
+
+        # 挿入対象データ
+        target_data_value: str = f'(\
+            \'{target_data_dict["date"]}\',\'{target_data_dict["company_name"]}\',\
+            \'{target_data_dict["work_place"]}\',\'{target_data_dict["work_detail"]}\',\
+            \'{target_data_dict["worker"]}\',\'{target_data_dict["worker_cost"]}\',\
+            \'{target_data_dict["material_cost"]}\',\'{target_data_dict["sales"]}\'\
+        )'
+
+        ### クエリ生成
+        _sql: str = f"INSERT INTO '{tabele_name}' {target_data_key} VALUES {target_data_value}"
+        ### クエリ実行
         self.__execute(_sql)
+        ### 実行結果を反映
         self.__commit()
-            
-        
+
     def fetch_user_all(self) -> str:
         """ユーザーテーブルを全て取得
 
@@ -200,10 +208,67 @@ class DatabaseControl:
         
         return DatabaseRetCode.SUCCESS, res_list
     
-    def update_data(self, table_name: str, target_id: int) -> list:
-        return DatabaseRetCode.SUCCESS
-    
-    def delete_data(self, table_name: str, target_id: int) -> list:
-        return DatabaseRetCode.SUCCESS    
-        
-        
+    def update_data(self, table_name: str, target_id: int, update_data_dict: dict) -> None:
+        """データ更新
+
+        Args:
+            table_name (str): テーブル名
+            target_id (int): 更新対象ID
+            update_data_dict (dict): 更新データ
+        """
+        # 引数チェック
+        if update_data_dict == {} or update_data_dict is None:
+            print('指定された更新データが空のためエラー')
+            return
+
+        # クエリー作成用変数定義
+        _query: str = ""
+        for key, value in update_data_dict.items():
+            # カラム名をまとめるための文字列を作成
+            _values: str = ""
+
+            ## カラムにいれるデータのタイプチェック
+            # カラムに設定する値をまとめた文字列を作成
+            if isinstance(value) is str:
+                # 値が文字列型(str型)の場合
+                _values = f'"{value}",'
+
+            else:
+                # 値が数値型(int型)の場合
+                _values = f"{value},"
+
+            _query += f"{key} = {_values},"
+
+        # 末尾のカンマは不要なため削除
+        _query = _query.rstrip(',')
+
+        # 実行用sqlを生成
+        _sql: str = f'UPDATE {table_name} SET {_query} WHERE target_id = {target_id}'
+        # クエリを実行
+        self.__execute(_sql)
+        # 変更を適用する
+        self.__commit()
+
+    def delete_data(self, table_name: str, target_id: int) -> None:
+        """データ削除
+
+        Args:
+            table_name (str): テーブル名
+            target_id (int): 対象ID
+        """
+        # 引数チェック
+        if table_name == "":
+            print('指定されたテーブル名が空のためエラー')
+            return
+
+        # 引数チェック
+        if target_id <= 0:
+            print('指定されたIDが 0 以下のためエラー')
+            return
+
+        # クエリ生成
+        _sql: str = f'DELETE FROM {table_name} WHERE target_id = {target_id}'
+        # クエリ実行
+        self.__execute(_sql)
+        # 変更を適用する
+        self.__commit()
