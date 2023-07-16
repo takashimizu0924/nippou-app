@@ -250,9 +250,6 @@ class Window():
     
     #閲覧ページ　最初の呼び出しはこのページ        
     def browse_data_window(self, companyname, username) -> None:
-        _data = self.get_data(companyname, username)
-        for data in _data:
-            print(data)
         self.user_name = username
         self.company_name = companyname
         menubar = tk.Menu(self.root)
@@ -319,7 +316,8 @@ class Window():
         self.tree.heading("worker", text="作業員数")
         self.tree.heading("cost", text="経費")
         self.tree.heading("sales", text="売上")
-
+        
+        _data = self.get_data(self.company_name, self.user_name)
         for data in _data:
             self.tree.insert("","end", values=(data[0], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9]))
         # for i in range(50):
