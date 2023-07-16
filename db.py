@@ -204,7 +204,6 @@ class DatabaseControl:
         self.__execute(_sql)
         
         res_list = self._cur.fetchall()
-        print(f"fetch_dataで取得したデータ--->{res_list}")
         
         return DatabaseRetCode.SUCCESS, res_list
     

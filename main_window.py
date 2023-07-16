@@ -32,7 +32,6 @@ class Window():
         
         #データ用
         self.data_dict = {
-            "user_name": str,
             "work_date": str,
             "company_name": str,
             "work_place": str,
@@ -72,7 +71,6 @@ class Window():
         material_cost = self.materialcost_entry.get()
         sales = self.sales_entry.get()
         
-        self.data_dict["user_name"] = self.user_name
         self.data_dict["work_date"] = work_date
         self.data_dict["company_name"] = company_name
         self.data_dict["work_place"] = work_place
@@ -82,11 +80,52 @@ class Window():
         self.data_dict["material_cost"] = int(material_cost)
         self.data_dict["sales"] = int(sales)
         db_ctr = DatabaseControl()
-        db_ctr.insert_data(table_name, work_date, company_name, work_place, work_detail, int(worker), int(worker_cost), int(material_cost), int(sales))
-        self.subwindow.destroy()
-        
+        db_ctr.insert_data(table_name, self.data_dict)
+        self.subwindow.destroy() 
         self._update_window()
-           
+
+    #登録データを編集する
+    def update_data(self) -> None:
+        table_name = self.company_name + self.user_name
+        work_date = self.date_label_entry.get()
+        company_name = self.company_entry.get()
+        work_place = self.workplace_entry.get()
+        work_detail = self.workdetail_entry.get()
+        worker = self.worker_entry.get()
+        worker_cost = self.workercost_entry.get()
+        material_cost = self.materialcost_entry.get()
+        sales = self.sales_entry.get()
+        
+        target_id = int(self.selected_data[0]) 
+        self.data_dict["work_date"] = work_date
+        self.data_dict["company_name"] = company_name
+        self.data_dict["work_place"] = work_place
+        self.data_dict["work_detail"] = work_detail
+        self.data_dict["worker"] = int(worker)
+        self.data_dict["worker_cost"] = int(worker_cost)
+        self.data_dict["material_cost"] = int(material_cost)
+        self.data_dict["sales"] = int(sales)
+        db_ctr = DatabaseControl()
+        db_ctr.update_data(table_name, target_id, self.data_dict)
+        self.subwindow.destroy()
+        self._update_window()
+
+    #選択データの削除
+    def delete_data(self) -> None:
+        selected_id = self.tree.selection()
+        if len(selected_id) > 1:
+            messagebox.showinfo("確認", "複数選択されています。\n １項目のみ選択可能です")
+        elif not selected_id:
+            messagebox.showinfo("確認", "削除する項目を選択してください")
+        
+        else:
+            self.selected_data = self.tree.item(selected_id, "values")
+            table_name = self.company_name + self.user_name
+            target_id = int(self.selected_data[0])
+            db_ctr = DatabaseControl()
+            db_ctr.delete_data(table_name, target_id)
+            self._update_window()
+            
     #アプリを終了する関数
     def quit_app(self) -> None:
         self.root.quit()
@@ -108,9 +147,8 @@ class Window():
             messagebox.showinfo("確認", "編集する項目を選択してください")
         
         else:
-            selected_data = self.tree.item(selected_id, "values")
-            print(selected_data)
-            self.edit_data_window(selected_data)
+            self.selected_data = self.tree.item(selected_id, "values")
+            self.edit_data_window(self.selected_data)
 
     def _update_window(self) -> None:
         self.browes_title_frame.destroy()
@@ -118,15 +156,10 @@ class Window():
         self.browes_tree_frame.destroy()
         self.browes_button_frame.destroy()
         self.browse_data_window(self.company_name, self.user_name)
-    #ツリービューの削除ボタン押下関数
-    def delete_data(self) -> None:
-        selected_id = self.tree.selection()
-        for item_id in selected_id:
-            self.tree.delete(item_id)
-
-    # 日報入力用ページ
-    def open_add_inputdata(self) -> None:
         
+
+    # 日報入力ページ
+    def open_add_inputdata(self) -> None:
         self.subwindow = tk.Toplevel()
         self.subwindow.title(f"{self.user_name+'さんの日報入力'}")
         self.subwindow.geometry("750x450+520+250")
