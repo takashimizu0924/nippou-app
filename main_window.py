@@ -1,6 +1,6 @@
-import tkinter as tk 
+import tkinter as tk
 import tkinter.ttk as ttk
-from tkinter import messagebox
+from tkinter import messagebox, StringVar
 from db import DatabaseControl
 
 
@@ -20,16 +20,16 @@ class Window():
         self._APP_POSITION_Y: int = 150
         self._RESIZE_WINDOW_X: bool = False
         self._RESIZE_WINDOW_Y: bool = False
-        
+
         self._INPUT_DATA_TITLE: str = "日報入力"
         self._INPUT_DATA_WIDTH: int = 750
         self._INPUT_DATA_HEIGHT: int = 450
         self._INPUT_DATA_POSITION_X: int = 520
         self._INPUT_DATA_POSITION_Y: int = 250
-        
+
         #各Frame
         self.login_frame = tk.Frame()
-        
+
         #データ用
         self.data_dict = {
             "work_date": str,
@@ -41,8 +41,11 @@ class Window():
             "material_cost": int,
             "sales": int
         }
-        
-        
+
+        # 会社名プルダウン用
+        self.pulldown_menu_list: list = []
+        self.pulldown_cur_data_num: int = 0
+
     def main_window(self, username) -> None:
         self.user_name = username
         self.main_frame = tk.Frame(self.root)
@@ -51,14 +54,14 @@ class Window():
         label2 = tk.Label(self.main_frame, text="test")
         label.pack()
         label2.pack()
-    
+
     #Userの登録データを取得
-    def get_data(self, companyname, username) -> str:
+    def get_data(self, companyname, username) -> list:
         db_ctr = DatabaseControl()
         tablename = companyname + username
         _, data_list = db_ctr.fetch_data(tablename)
         return data_list
-    
+
     #Userの入力データを登録
     def add_data(self):
         table_name = self.company_name + self.user_name
@@ -70,7 +73,7 @@ class Window():
         worker_cost = self.workercost_entry.get()
         material_cost = self.materialcost_entry.get()
         sales = self.sales_entry.get()
-        
+
         self.data_dict["work_date"] = work_date
         self.data_dict["company_name"] = company_name
         self.data_dict["work_place"] = work_place
@@ -95,7 +98,7 @@ class Window():
         worker_cost = self.workercost_entry.get()
         material_cost = self.materialcost_entry.get()
         sales = self.sales_entry.get()
-        
+
         target_id = int(self.selected_data[0]) 
         self.data_dict["work_date"] = work_date
         self.data_dict["company_name"] = company_name
@@ -117,7 +120,7 @@ class Window():
             messagebox.showinfo("確認", "複数選択されています。\n １項目のみ選択可能です")
         elif not selected_id:
             messagebox.showinfo("確認", "削除する項目を選択してください")
-        
+
         else:
             self.selected_data = self.tree.item(selected_id, "values")
             table_name = self.company_name + self.user_name
@@ -125,19 +128,19 @@ class Window():
             db_ctr = DatabaseControl()
             db_ctr.delete_data(table_name, target_id)
             self._update_window()
-            
+
     #アプリを終了する関数
     def quit_app(self) -> None:
         self.root.quit()
-    
+
     def open_setting(self) -> None:
         subwindow = tk.Toplevel()
         subwindow.title("設定")
         subwindow.geometry("500x500+600+300")
-        
+
         subwindow_label = tk.Label(subwindow, text="設定画面です")
         subwindow_label.pack()
-    
+
     #ツリービューの編集ボタン押下関数
     def edit_data(self) -> None:
         selected_id = self.tree.selection()
@@ -145,7 +148,7 @@ class Window():
             messagebox.showinfo("確認", "複数選択されています。\n １項目のみ選択可能です")
         elif not selected_id:
             messagebox.showinfo("確認", "編集する項目を選択してください")
-        
+
         else:
             self.selected_data = self.tree.item(selected_id, "values")
             self.edit_data_window(self.selected_data)
@@ -156,7 +159,17 @@ class Window():
         self.browes_tree_frame.destroy()
         self.browes_button_frame.destroy()
         self.browse_data_window(self.company_name, self.user_name)
-        
+
+    def combobox_action_cb(self, select_data: str) -> None:
+        """コンボボックスイベントコールバック
+        """
+        print(f'コンボボックス選択イベント発生: \nself.pulldown_menu_list:{self.pulldown_menu_list}')
+        if select_data in self.pulldown_menu_list:
+            self.pulldown_cur_data_num = self.pulldown_menu_list.index(select_data)
+        else:
+            self.pulldown_cur_data_num = 0
+        # 画面を更新
+        self._update_window()
 
     # 日報入力ページ
     def open_add_inputdata(self) -> None:
@@ -170,10 +183,10 @@ class Window():
         self.input_title_frame.pack()
         self.input_main_frame.pack(fill="x")
         self.input_submit_frame.pack()
-        
+
         title_label = tk.Label(self.input_title_frame, text="日報入力", font=("meiryo",15,"bold"))
         title_label.grid(row=0, column=0, pady=(30,50))
-        
+
         date_label = tk.Label(self.input_main_frame, text="工事日", font=("meiryo", 10))
         company_label = tk.Label(self.input_main_frame, text="会社名", font=("meiryo", 10))
         workplace_label = tk.Label(self.input_main_frame, text="現場名", font=("meiryo", 10))
@@ -182,7 +195,7 @@ class Window():
         workercost_label = tk.Label(self.input_main_frame, text="作業員代", font=("meiryo", 10))
         materialcost_label = tk.Label(self.input_main_frame, text="材料費", font=("meiryo", 10))
         salese_label = tk.Label(self.input_main_frame, text="売上", font=("meiryo", 10))
-        
+
         date_label.grid(row=1, column=0, padx=(38,5), pady=(10,10), sticky=tk.E)
         company_label.grid(row=2, column=0, padx=(38,5), pady=(10,10), sticky=tk.E)
         workplace_label.grid(row=2, column=2, padx=(38,5), pady=(10,10), sticky=tk.E)
@@ -191,7 +204,7 @@ class Window():
         workercost_label.grid(row=4, column=2, padx=(38,5), pady=(10,10), sticky=tk.E)
         materialcost_label.grid(row=5, column=0, padx=(38,5), pady=(10,10), sticky=tk.E)
         salese_label.grid(row=5, column=2, padx=(38,5), pady=(10,10), sticky=tk.E)
-        
+
         self.date_label_entry = tk.Entry(self.input_main_frame, width=20, font=("meiryo", 8))
         self.company_entry = ttk.Combobox(self.input_main_frame, width=25, font=("meiryo", 8))
         self.workplace_entry = tk.Entry(self.input_main_frame, width=30, font=("meiryo", 8))
@@ -200,7 +213,7 @@ class Window():
         self.workercost_entry = tk.Entry(self.input_main_frame, width=30, font=("meiryo", 8), justify="right")
         self.materialcost_entry = tk.Entry(self.input_main_frame, width=30, font=("meiryo", 8), justify="right")
         self.sales_entry = tk.Entry(self.input_main_frame, width=30, font=("meiryo", 8), justify="right")
-        
+
         self.date_label_entry.grid(row=1, column=1, padx=(20,10), pady=(10,10),sticky="w")
         self.company_entry.grid(row=2, column=1, padx=(20,10), pady=(10,10), sticky=tk.W)
         self.workplace_entry.grid(row=2, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
@@ -209,11 +222,10 @@ class Window():
         self.workercost_entry.grid(row=4, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
         self.materialcost_entry.grid(row=5, column=1, padx=(20,10), pady=(10,10), sticky=tk.EW)
         self.sales_entry.grid(row=5, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
-        
-        
+
         submit = tk.Button(self.input_submit_frame, text="登録", width=10, command=self.add_data)
         submit.pack(pady=(30,5))
-        
+
     #編集ページ
     def edit_data_window(self, selected_data):
         self.subwindow = tk.Toplevel()
@@ -226,10 +238,10 @@ class Window():
         title_frame.pack()
         main_frame.pack(fill="x")
         submit_frame.pack()
-        
+
         title_label = tk.Label(title_frame, text="日報編集", font=("meiryo",15,"bold"))
         title_label.grid(row=0, column=0, pady=(30,50))
-        
+
         date_label = tk.Label(main_frame, text="工事日", font=("meiryo", 10))
         company_label = tk.Label(main_frame, text="会社名", font=("meiryo", 10))
         workplace_label = tk.Label(main_frame, text="現場名", font=("meiryo", 10))
@@ -238,7 +250,7 @@ class Window():
         workercost_label = tk.Label(main_frame, text="作業員代", font=("meiryo", 10))
         materialcost_label = tk.Label(main_frame, text="材料費", font=("meiryo", 10))
         salese_label = tk.Label(main_frame, text="売上", font=("meiryo", 10))
-        
+
         date_label.grid(row=1, column=0, padx=(38,5), pady=(10,10), sticky=tk.E)
         company_label.grid(row=2, column=0, padx=(38,5), pady=(10,10), sticky=tk.E)
         workplace_label.grid(row=2, column=2, padx=(38,5), pady=(10,10), sticky=tk.E)
@@ -247,7 +259,7 @@ class Window():
         workercost_label.grid(row=4, column=2, padx=(38,5), pady=(10,10), sticky=tk.E)
         materialcost_label.grid(row=5, column=0, padx=(38,5), pady=(10,10), sticky=tk.E)
         salese_label.grid(row=5, column=2, padx=(38,5), pady=(10,10), sticky=tk.E)
-        
+
         self.date_label_entry = tk.Entry(main_frame, width=20, font=("meiryo", 8))
         self.company_entry = ttk.Combobox(main_frame, width=25, font=("meiryo", 8))
         self.workplace_entry = tk.Entry(main_frame, width=30, font=("meiryo", 8))
@@ -256,9 +268,7 @@ class Window():
         self.workercost_entry = tk.Entry(main_frame, width=30, font=("meiryo", 8), justify="right")
         self.materialcost_entry = tk.Entry(main_frame, width=30, font=("meiryo", 8), justify="right")
         self.sales_entry = tk.Entry(main_frame, width=30, font=("meiryo", 8), justify="right")
-        
-        
-        
+
         self.date_label_entry.grid(row=1, column=1, padx=(20,10), pady=(10,10),sticky="w")
         self.company_entry.grid(row=2, column=1, padx=(20,10), pady=(10,10), sticky=tk.W)
         self.workplace_entry.grid(row=2, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
@@ -267,7 +277,7 @@ class Window():
         self.workercost_entry.grid(row=4, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
         self.materialcost_entry.grid(row=5, column=1, padx=(20,10), pady=(10,10), sticky=tk.EW)
         self.sales_entry.grid(row=5, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
-        
+
         self.date_label_entry.insert(0, selected_data[1])
         self.company_entry.insert(0, selected_data[2])
         self.workplace_entry.insert(0, selected_data[3])
@@ -276,11 +286,10 @@ class Window():
         self.workercost_entry.insert(0, selected_data[6])
         self.materialcost_entry.insert(0, selected_data[7])
         self.sales_entry.insert(0, selected_data[8])
-        
-        
+
         submit = tk.Button(submit_frame, text="登録", width=10, command=self.update_data)
         submit.pack(pady=(30,5))
-    
+
     #閲覧ページ　最初の呼び出しはこのページ        
     def browse_data_window(self, companyname, username) -> None:
         self.user_name = username
@@ -311,9 +320,22 @@ class Window():
         #上部
         page_title = tk.Label(self.browes_title_frame,text=f"{self.user_name+'の集計閲覧'}", font=("meiryo",15,"bold"))
         page_title.grid(row=0, column=0)
-        
+
         company_label = tk.Label(self.browes_top_frame, text="取引先名", font=("meiryo",10))
-        company = ttk.Combobox(self.browes_top_frame,width=25, font=("meiryo",10),style="TCombobox")
+
+        ### コンボボックス処理
+        # データベースから情報取得
+        self.pulldown_menu_list.clear()
+        self.pulldown_menu_list = ["全て"]
+        # バッファの配列データにDBから取得したデータを挿入
+        user_data_list = self.get_data(self.company_name, self.user_name)
+        for data in user_data_list:
+            self.pulldown_menu_list.append(data[3])
+        combobox_text_var = StringVar()
+        company = ttk.Combobox(self.browes_top_frame, textvariable=combobox_text_var ,values=self.pulldown_menu_list, width=25, font=("meiryo",10),style="TCombobox")
+        company.set(self.pulldown_menu_list[self.pulldown_cur_data_num])
+        company.bind(" <<ComboboxSelected>> ", lambda func: self.combobox_action_cb(combobox_text_var.get()))
+
         total_cost_label = tk.Label(self.browes_top_frame,text="合計経費", font=("meiryo",10))
         total_sales_label = tk.Label(self.browes_top_frame, text="合計売上", font=("meiryo",10))
         total_cost_data = tk.Label(self.browes_top_frame, text="￥1223213", relief="sunken", anchor="e", width=35, font=("meiryo",10), justify="right", padx=10)
@@ -326,9 +348,7 @@ class Window():
         total_sales_label.grid(row=1, column=2, padx=(60,30), pady=(30,15))
         total_sales_data.grid(row=1, column=3, pady=(30,15))
 
-
         #ツリービュー作成
-
         self.tree = ttk.Treeview(self.browes_tree_frame,height=15)
         self.tree['columns'] = ("id", "date", "company_name", "work_place", "work_detail", "worker", "cost", "material_cost", "sales")
         self.tree['displaycolumns'] = ["date","work_place", "worker", "cost", "sales"]
@@ -341,21 +361,18 @@ class Window():
         self.tree.column("cost", width=150, anchor=tk.E)
         self.tree.column("sales", width=150, anchor=tk.E)
 
-
-
         #ツリービューのカラムの見出し設定
         self.tree.heading("date", text="日付")
         self.tree.heading("work_place", text="現場名")
         self.tree.heading("worker", text="作業員数")
         self.tree.heading("cost", text="経費")
         self.tree.heading("sales", text="売上")
-        
+
         _data = self.get_data(self.company_name, self.user_name)
         for data in _data:
             self.tree.insert("","end", values=(data[0], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9]))
         # for i in range(50):
         #     self.tree.insert("","end", values=("2023/6/26", "ＲＧ石城町", "1", "20,000", "50,000"))
-
 
         #スクロールバーを作成
         scroll_v = ttk.Scrollbar(self.browes_tree_frame, orient="vertical", command=self.tree.yview)

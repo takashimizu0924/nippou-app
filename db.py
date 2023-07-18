@@ -2,7 +2,6 @@ import sqlite3
 
 class DatabaseRetCode:
     """リターンコード"""
-    
     SUCCESS: int                        = 0
     DB_CONNECTION_ERROR: int            = -1
     DB_CREATE_TABLE_ERROR: int          = -2
@@ -13,7 +12,7 @@ class DatabaseRetCode:
     DB_TABLE_FETCH_RECORD_ERROR: int    = -7
     DB_DISCONNECTION_ERROR: int         = -8
     DB_OTHER_ERROR: int                 = -9
-    
+
 class DatabaseControl:
     """データベース制御
     """
@@ -26,7 +25,7 @@ class DatabaseControl:
         self._cur = self._conn.cursor()
         # self._conn.execute("DROP TABLE user")
         self.create_user_table()
-        
+
     def __execute(self, sql: str) -> None:
         """sql文を実行
 
@@ -35,13 +34,13 @@ class DatabaseControl:
         """
         self._cur.execute(sql)
         return
-    
+
     def __commit(self) -> None:
         """変更適用
         """
         self._conn.commit()
         return
-    
+
     def create_user_table(self):
         """ユーザー登録用テーブル作成
         
@@ -54,14 +53,14 @@ class DatabaseControl:
         table_name: str = "user"
         #実行用sql文を作成
         _sql: str = f"CREATE TABLE IF NOT EXISTS {table_name}(id INTEGER PRIMARY KEY AUTOINCREMENT, company_name TEXT, user_name TEXT, password INTGER)"
-        
+
         #実行用sql文を実行
         self.__execute(_sql)
-        
+
         self.__commit()
-        
+
         return DatabaseRetCode.SUCCESS
-    
+
     def create_data_table(self, table_name: str) -> None:
         """ユーザーのデータ用テーブル作成
 
@@ -70,16 +69,14 @@ class DatabaseControl:
         """
         if table_name == "":
             return DatabaseRetCode.DB_CREATE_TABLE_ERROR
-        
+
         #実行用sql文を作成
-        #NOTE: テーブルカラム -> user_name, workdate, company_name, work_place, work_detail, worker, worker_cost, material_cost, sales  
-        _sql: str = f"CREATE TABLE IF NOT EXISTS {table_name}(id INTEGER PRIMARY KEY AUTOINCREMENT, user_name TEXT, workdate DATETIME, company_name TEXT, work_place TEXT, work_detail TEXT, worker INTEGER, worker_cost INTEGER, material_cost INTEGER, sales INTEGER)"
-        
+        #NOTE: テーブルカラム -> user_name, work_date, company_name, work_place, work_detail, worker, worker_cost, material_cost, sales  
+        _sql: str = f"CREATE TABLE IF NOT EXISTS {table_name}(id INTEGER PRIMARY KEY AUTOINCREMENT, user_name TEXT, work_date DATETIME, company_name TEXT, work_place TEXT, work_detail TEXT, worker INTEGER, worker_cost INTEGER, material_cost INTEGER, sales INTEGER)"
+
         #実行用sql文を実行
         self.__execute(_sql)
-        
         self.__commit()
-        
         return DatabaseRetCode.SUCCESS
     
     def insert_user(self, company_name: str, user_name: str, password: str) -> None:
@@ -95,7 +92,7 @@ class DatabaseControl:
         _sql: str = f"INSERT INTO user (company_name, user_name, password)VALUES ('{company_name}','{user_name}','{password}')"
         self.__execute(_sql)
         self.__commit()
-        
+
     def insert_data(self, tabele_name: str, target_data_dict: dict) -> None:
         """データ挿入
 
@@ -105,7 +102,7 @@ class DatabaseControl:
         """
         ### クエリに挿入するデータ)生成
         # 挿入対象キー
-        target_data_key: str = '(workdate, company_name, work_place, \
+        target_data_key: str = '(work_date, company_name, work_place, \
             work_detail, worker, worker_cost, material_cost, sales)'
 
         # 挿入対象データ
@@ -123,28 +120,62 @@ class DatabaseControl:
         ### 実行結果を反映
         self.__commit()
 
-    def fetch_user_all(self) -> str:
-        """ユーザーテーブルを全て取得
+    def fetch(self, target_table_name: str, target_data_dict: dict) -> list:
+        """データ取得
+            NOTE: 指定する対象データはキーとバリューのセットを指定する
 
         Args:
-            company_name (_type_): _description_
-            user_name (_type_): _description_
-            password (_type_): _description_
+            table_name (_type_): テーブル名
+            target_data_dict (dict): 取得対象データ
 
         Returns:
             list: _description_
         """
-        table_name: str = "user"
+        # クエリ用データ生成
+        table_name: str = target_table_name
+        query: str = ''
+        is_multiple: bool = False
+
+        # 応答生成
+        rsp: list = []
+
+        # 引数チェック(テーブル名)
+        if table_name == '':
+            print('テーブル名が指定されていません')
+            return rsp
+
+        # 引数チェック(対象データ)
+        if not (target_data_dict is None or target_data_dict == {}):
+            # クエリに取得条件を追加
+            query += 'WHERE '
+
+            # 要求データ生成
+            for key, val in target_data_dict.items():
+                # 複数条件判定
+                if is_multiple:
+                    query += ' AND '
+
+                # カラム名をまとめる
+                values: str = ''
+
+                # データが文字列の場合
+                if isinstance(val, str):
+                    values = f'\'{val}\''
+
+                else:
+                    values = f'{val}'
+
+                query += f'{key} = {values}'
+                # 複数条件フラグを立てる
+                is_multiple = True
+
         #実行用sql文を作成
-        _sql: str = f"SELECT * FROM {table_name}"
+        _sql: str = f"SELECT * FROM {table_name} {query}"
         #実行用sql文を実行
         self.__execute(_sql)
-        
-        res_list = self._cur.fetchall()
-       
-        
-        return DatabaseRetCode.SUCCESS, res_list
-    
+        rsp = self._cur.fetchall()
+        return rsp
+
     def fetch_user(self, company_name, user_name, password) -> list:
         """ユーザーテーブルに登録されているユーザーを取得
 
@@ -157,14 +188,14 @@ class DatabaseControl:
         table_name: str = "user"
         #実行用sql文を作成
         _sql: str = f"SELECT * FROM {table_name} WHERE company_name = '{company_name}' AND user_name = '{user_name}' AND password = '{password}' "
-        
+
         #実行用sql文を実行
         self.__execute(_sql)
-        
+
         res_list = self._cur.fetchall()
-        
+
         return DatabaseRetCode.SUCCESS, res_list
-        
+
     def fetch_select_company(self, company_name) -> list:
         """会社名からユーザーを取得
 
@@ -228,13 +259,13 @@ class DatabaseControl:
 
             ## カラムにいれるデータのタイプチェック
             # カラムに設定する値をまとめた文字列を作成
-            if isinstance(value) is str:
+            if isinstance(value, str):
                 # 値が文字列型(str型)の場合
-                _values = f'"{value}",'
+                _values = f'"{value}"'
 
             else:
                 # 値が数値型(int型)の場合
-                _values = f"{value},"
+                _values = f"{value}"
 
             _query += f"{key} = {_values},"
 
@@ -243,6 +274,7 @@ class DatabaseControl:
 
         # 実行用sqlを生成
         _sql: str = f'UPDATE {table_name} SET {_query} WHERE id = {target_id}'
+        print(f'_sql:{_sql}')
         # クエリを実行
         self.__execute(_sql)
         # 変更を適用する
