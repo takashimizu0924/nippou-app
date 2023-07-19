@@ -337,6 +337,7 @@ class Window():
         self.pulldown_menu_list.clear()
         self.pulldown_menu_list = ["全て"]
         is_pulldown_empty: bool = False
+
         # DBから取得したデータをバッファの配列データに追加
         user_data_list = self.get_data(self.company_name, self.user_name)
         print(f'user_data_list: {user_data_list}')
@@ -359,10 +360,27 @@ class Window():
         company.set(self.pulldown_menu_list[self.pulldown_cur_data_num])
         company.bind(" <<ComboboxSelected>> ", lambda func: self.combobox_action_cb(combobox_text_var.get()))
 
+        ### コストラベル
+        # コストデータ用
+        total_cost: int = 0
+        total_sales: int = 0
+
+        # コストデータ生成
+        if not is_pulldown_empty:
+            for data in user_data_list:
+                if self.pulldown_cur_data_num == 0:
+                    # 合計経費・合計売上データを算出
+                    total_cost += int(data[7]) + int(data[8])
+                    total_sales += int(data[9])
+                else:
+                    if data[3] == self.pulldown_menu_list[self.pulldown_cur_data_num]:
+                        total_cost += int(data[7]) + int(data[8])
+                        total_sales += int(data[9])
+
         total_cost_label = tk.Label(self.browes_top_frame,text="合計経費", font=("meiryo",10))
         total_sales_label = tk.Label(self.browes_top_frame, text="合計売上", font=("meiryo",10))
-        total_cost_data = tk.Label(self.browes_top_frame, text="￥1223213", relief="sunken", anchor="e", width=35, font=("meiryo",10), justify="right", padx=10)
-        total_sales_data = tk.Label(self.browes_top_frame, text="￥1223213", relief="sunken", anchor="e", width=35, font=("meiryo",10), justify="right", padx=10)
+        total_cost_data = tk.Label(self.browes_top_frame, text=f"￥{total_cost}", relief="sunken", anchor="e", width=35, font=("meiryo",10), justify="right", padx=10)
+        total_sales_data = tk.Label(self.browes_top_frame, text=f"￥{total_sales}", relief="sunken", anchor="e", width=35, font=("meiryo",10), justify="right", padx=10)
 
         company_label.grid(row=0,column=0, padx=(60,30), pady=(30,15))
         company.grid(row=0,column=1, pady=(30,15), sticky=tk.W)

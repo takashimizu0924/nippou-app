@@ -5,3 +5,6 @@ __pycache__
 # アプリケーション関連
 nippo_app
 *.db
+
+# データベースファイル
+*work_manager
