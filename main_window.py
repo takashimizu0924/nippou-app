@@ -29,6 +29,8 @@ class Window():
 
         #各Frame
         self.login_frame = tk.Frame()
+        # ツリービューオブジェクト
+        self.tree: ttk.Treeview = None
 
         #データ用
         self.data_dict = {
@@ -278,14 +280,21 @@ class Window():
         self.materialcost_entry.grid(row=5, column=1, padx=(20,10), pady=(10,10), sticky=tk.EW)
         self.sales_entry.grid(row=5, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
 
-        self.date_label_entry.insert(0, selected_data[1])
-        self.company_entry.insert(0, selected_data[2])
-        self.workplace_entry.insert(0, selected_data[3])
-        self.workdetail_entry.insert(0, selected_data[4])
-        self.worker_entry.insert(0, selected_data[5])
-        self.workercost_entry.insert(0, selected_data[6])
-        self.materialcost_entry.insert(0, selected_data[7])
-        self.sales_entry.insert(0, selected_data[8])
+        user_data_list = self.get_data(self.company_name, self.user_name)
+        print(f'selected_data[0]: {selected_data[0]}, {type(selected_data[0])}\nuser_data_list: {user_data_list}')
+        user_data: list = []
+        for data in user_data_list:
+            if int(data[0]) == int(selected_data[0]):
+                user_data = list(data)
+
+        self.date_label_entry.insert(0, user_data[2])
+        self.company_entry.insert(0, user_data[3])
+        self.workplace_entry.insert(0, user_data[4])
+        self.workdetail_entry.insert(0, user_data[5])
+        self.worker_entry.insert(0, user_data[6])
+        self.workercost_entry.insert(0, user_data[7])
+        self.materialcost_entry.insert(0, user_data[8])
+        self.sales_entry.insert(0, user_data[9])
 
         submit = tk.Button(submit_frame, text="登録", width=10, command=self.update_data)
         submit.pack(pady=(30,5))
@@ -330,10 +339,15 @@ class Window():
         is_pulldown_empty: bool = False
         # DBから取得したデータをバッファの配列データに追加
         user_data_list = self.get_data(self.company_name, self.user_name)
+        print(f'user_data_list: {user_data_list}')
+
+        # 取得データサイズチェック
         if len(user_data_list) <= 0:
             self.pulldown_cur_data_num = 0
             is_pulldown_empty = True
+
         else:
+            # データがある場合はプルダウンメニューに項目追加
             for data in user_data_list:
                 # 重複データが存在する場合は配列へのデータ追加をスキップする
                 if data[3] in self.pulldown_menu_list:
@@ -357,37 +371,53 @@ class Window():
         total_sales_label.grid(row=1, column=2, padx=(60,30), pady=(30,15))
         total_sales_data.grid(row=1, column=3, pady=(30,15))
 
-        #ツリービュー作成
-        self.tree = ttk.Treeview(self.browes_tree_frame,height=15)
-        self.tree['columns'] = ("id", "date", "company_name", "work_place", "work_detail", "worker", "cost", "material_cost", "sales")
-        self.tree['displaycolumns'] = ["date","work_place", "worker", "cost", "sales"]
-        self.tree['show'] = 'headings'
+        ### ツリービュー作成
+        tree_columns = ('id', 'date', 'work_place', 'worker', 'cost', 'sales')
+        self.tree = ttk.Treeview(self.browes_tree_frame,height=15, columns=tree_columns)
 
-        #ツリービューのカラムの設定
+        #ツリービューの列の設定
+        self.tree.column('#0', width=0, stretch='no')
+        self.tree.column('id', width=0, stretch='no')
         self.tree.column("date", width=80)
         self.tree.column("work_place", width=500)
         self.tree.column("worker", width=75, anchor=tk.E)
         self.tree.column("cost", width=150, anchor=tk.E)
         self.tree.column("sales", width=150, anchor=tk.E)
 
-        #ツリービューのカラムの見出し設定
+        #ツリービューの列の見出し設定
+        self.tree.heading('#0', text='')
+        self.tree.heading('id', text='')
         self.tree.heading("date", text="日付")
         self.tree.heading("work_place", text="現場名")
         self.tree.heading("worker", text="作業員数")
         self.tree.heading("cost", text="経費")
         self.tree.heading("sales", text="売上")
 
-        ### ツリービューにデータ挿入(NOTE: 現在の会社名情報のインデックスから表示させるデータを選定)
+        # ツリービューにデータ挿入(NOTE: 現在の会社名情報のインデックスから表示させるデータを選定)
         if is_pulldown_empty:
             self.tree.insert("","end", values=[""])
 
         if self.pulldown_cur_data_num == 0:
             for data in user_data_list:
-                self.tree.insert("","end", values=(data[0], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9]))
+                # ツリービューに表示する各データを生成
+                data_id = data[0]
+                date = data[2]
+                work_place = data[4]
+                worker = data[6]
+                cost = str( int(data[7]) + int(data[8]) )
+                sales = data[9]
+                self.tree.insert("","end", values=(data_id, date, work_place, worker, cost, sales))
         else:
             for data in user_data_list:
                 if data[3] == self.pulldown_menu_list[self.pulldown_cur_data_num]:
-                    self.tree.insert("","end", values=(data[0], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9]))
+                    # ツリービューに表示する各データを生成
+                    data_id = data[0]
+                    date = data[2]
+                    work_place = data[4]
+                    worker = data[6]
+                    cost = str( int(data[7]) + int(data[8]) )
+                    sales = data[9]
+                    self.tree.insert("","end", values=(data_id, date, work_place, worker, cost, sales))
 
         #スクロールバーを作成
         scroll_v = ttk.Scrollbar(self.browes_tree_frame, orient="vertical", command=self.tree.yview)
