@@ -47,6 +47,7 @@ class Window():
         # 会社名プルダウン用
         self.pulldown_menu_list: list = []
         self.pulldown_cur_data_num: int = 0
+        
 
     def main_window(self, username) -> None:
         self.user_name = username
@@ -75,7 +76,7 @@ class Window():
         worker_cost = self.workercost_entry.get()
         material_cost = self.materialcost_entry.get()
         sales = self.sales_entry.get()
-
+        
         self.data_dict["work_date"] = work_date
         self.data_dict["company_name"] = company_name
         self.data_dict["work_place"] = work_place
@@ -162,10 +163,16 @@ class Window():
         self.browes_button_frame.destroy()
         self.browse_data_window(self.company_name, self.user_name)
 
+    #入力画面の閉じるボタンを押下された際の関数
+    def delite_subwindow(self) -> None:
+        self.add_button.config(state="normal")
+        self.edit_button.config(state="normal")
+        self.del_button.config(state="normal")
+        self.subwindow.destroy()
+    
     def combobox_action_cb(self, select_data: str) -> None:
         """コンボボックスイベントコールバック
         """
-        print(f'コンボボックス選択イベント発生: \nself.pulldown_menu_list:{self.pulldown_menu_list}')
         if select_data in self.pulldown_menu_list:
             self.pulldown_cur_data_num = self.pulldown_menu_list.index(select_data)
         else:
@@ -178,6 +185,15 @@ class Window():
         self.subwindow = tk.Toplevel()
         self.subwindow.title(f"{self.user_name+'さんの日報入力'}")
         self.subwindow.geometry("750x450+520+250")
+        
+        #入力画面の閉じるボタンを押下時に呼び出す
+        self.subwindow.wm_protocol("WM_DELETE_WINDOW", self.delite_subwindow)
+        
+        #入力画面表示中は閲覧ページの【入力】【編集】【削除】ボタンは押せなくする
+        self.add_button.config(state="disabled")
+        self.edit_button.config(state="disabled")
+        self.del_button.config(state="disabled")
+        
         #登録ページ用フレーム作成
         self.input_title_frame = tk.Frame(self.subwindow)
         self.input_main_frame = tk.Frame(self.subwindow)
@@ -233,6 +249,15 @@ class Window():
         self.subwindow = tk.Toplevel()
         self.subwindow.title(f"{self.user_name+'さんの日報編集'}")
         self.subwindow.geometry("750x450+520+250")
+        
+        #入力画面の閉じるボタンを押下時に呼び出す
+        self.subwindow.wm_protocol("WM_DELETE_WINDOW", self.delite_subwindow)
+        
+        #入力画面表示中は閲覧ページの【入力】【編集】【削除】ボタンは押せなくする
+        self.add_button.config(state="disabled")
+        self.edit_button.config(state="disabled")
+        self.del_button.config(state="disabled")
+        
         #登録ページ用フレーム作成
         title_frame = tk.Frame(self.subwindow)
         main_frame = tk.Frame(self.subwindow)
@@ -281,7 +306,7 @@ class Window():
         self.sales_entry.grid(row=5, column=3, padx=(20,10), pady=(10,10), sticky=tk.EW)
 
         user_data_list = self.get_data(self.company_name, self.user_name)
-        print(f'selected_data[0]: {selected_data[0]}, {type(selected_data[0])}\nuser_data_list: {user_data_list}')
+    
         user_data: list = []
         for data in user_data_list:
             if int(data[0]) == int(selected_data[0]):
@@ -444,9 +469,9 @@ class Window():
         self.tree.configure(yscrollcommand=scroll_v.set)
         self.tree.grid(row=0, column=0, sticky=tk.NSEW)
 
-        add_button = tk.Button(self.browes_button_frame, text="追加", width=10, command=self.open_add_inputdata)
-        edit_button = tk.Button(self.browes_button_frame, text="編集", width=10, command=self.edit_data)
-        del_button = tk.Button(self.browes_button_frame, text="削除", width=10, background="red", command=self.delete_data)
-        add_button.grid(row=0, column=0, padx=30)
-        edit_button.grid(row=0, column=1, padx=30)
-        del_button.grid(row=0, column=2, padx=30)
+        self.add_button = tk.Button(self.browes_button_frame, text="追加", width=10, command=self.open_add_inputdata)
+        self.edit_button = tk.Button(self.browes_button_frame, text="編集", width=10, command=self.edit_data)
+        self.del_button = tk.Button(self.browes_button_frame, text="削除", width=10, background="red", command=self.delete_data)
+        self.add_button.grid(row=0, column=0, padx=30)
+        self.edit_button.grid(row=0, column=1, padx=30)
+        self.del_button.grid(row=0, column=2, padx=30)
