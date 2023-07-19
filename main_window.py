@@ -327,13 +327,18 @@ class Window():
         # データベースから情報取得
         self.pulldown_menu_list.clear()
         self.pulldown_menu_list = ["全て"]
-        # バッファの配列データにDBから取得したデータを挿入
+        is_pulldown_empty: bool = False
+        # DBから取得したデータをバッファの配列データに追加
         user_data_list = self.get_data(self.company_name, self.user_name)
-        for data in user_data_list:
-            # 重複データが存在する場合は配列へのデータ追加をスキップする
-            if data[3] in self.pulldown_menu_list:
-                continue
-            self.pulldown_menu_list.append(data[3])
+        if len(user_data_list) <= 0:
+            self.pulldown_cur_data_num = 0
+            is_pulldown_empty = True
+        else:
+            for data in user_data_list:
+                # 重複データが存在する場合は配列へのデータ追加をスキップする
+                if data[3] in self.pulldown_menu_list:
+                    continue
+                self.pulldown_menu_list.append(data[3])
 
         combobox_text_var = StringVar()
         company = ttk.Combobox(self.browes_top_frame, textvariable=combobox_text_var ,values=self.pulldown_menu_list, width=25, font=("meiryo",10),style="TCombobox")
@@ -373,15 +378,14 @@ class Window():
         self.tree.heading("sales", text="売上")
 
         ### ツリービューにデータ挿入(NOTE: 現在の会社名情報のインデックスから表示させるデータを選定)
-        _data = self.get_data(self.company_name, self.user_name)
-        if len(_data) <= 0:
+        if is_pulldown_empty:
             self.tree.insert("","end", values=[""])
 
         if self.pulldown_cur_data_num == 0:
-            for data in _data:
+            for data in user_data_list:
                 self.tree.insert("","end", values=(data[0], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9]))
         else:
-            for data in _data:
+            for data in user_data_list:
                 if data[3] == self.pulldown_menu_list[self.pulldown_cur_data_num]:
                     self.tree.insert("","end", values=(data[0], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9]))
 
