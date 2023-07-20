@@ -22,6 +22,7 @@ class App:
     def start(self):
         self.root = tk.Tk()
         self.root.title(self._APP_TITLE)
+        self.root.iconbitmap('nippou.ico')
         self.root.geometry(f"{self._APP_WIDTH}x{self._APP_HEIGHT}+{self._APP_POSITION_X}+{self._APP_POSITION_Y}")
         self.root.resizable(width=self._RESIZE_WINDOW_X, height=self._RESIZE_WINDOW_Y)
         window = Window(self.root)

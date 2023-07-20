@@ -189,6 +189,7 @@ class Window():
         self.subwindow = tk.Toplevel()
         self.subwindow.title(f"{self.user_name+'さんの日報入力'}")
         self.subwindow.geometry("750x450+520+250")
+        self.subwindow.iconbitmap('nippou.ico')
         
         #入力画面の閉じるボタンを押下時に呼び出す
         self.subwindow.wm_protocol("WM_DELETE_WINDOW", self.delite_subwindow)
@@ -253,6 +254,7 @@ class Window():
         self.subwindow = tk.Toplevel()
         self.subwindow.title(f"{self.user_name+'さんの日報編集'}")
         self.subwindow.geometry("750x450+520+250")
+        self.subwindow.iconbitmap('nippou.ico')
         
         #入力画面の閉じるボタンを押下時に呼び出す
         self.subwindow.wm_protocol("WM_DELETE_WINDOW", self.delite_subwindow)
