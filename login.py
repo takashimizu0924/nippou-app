@@ -78,9 +78,6 @@ class Login:
         #ユーザーリストにデータがない場合登録画面に遷移させるための返り値を返す
         if user_list[1] == []:
             messagebox.showinfo("確認", "未登録なのでそのまま登録してください")
-            # self.login_frame.destroy()
-            # self.add_user_widget()
-            # self.login_button.config(text="登録", command=self.__add_user(company_name, user_name, password))
             return False
         
         return True
@@ -138,16 +135,3 @@ class Login:
                 self.login_frame.destroy()
                 self.add_user_widget()
                 
-    def login_user(self) -> str:
-        return self._USER_NAME 
-        # self.window = Window(self.root, self._USER_NAME)
-        # self.window.input_data_window()
-         
-        # self.__login_check()
-        # self.__add_user(self._COMPANY_NAME, self._USER_NAME, self._USER_PASSWORD)
-        # try:
-        #     if len(self.database) > 0:
-        #         print("ok")
-        # except:
-        #     print("Not in database...")
-        #     return

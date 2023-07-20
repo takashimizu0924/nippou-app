@@ -66,7 +66,7 @@ class Window():
         return data_list
 
     #Userの入力データを登録
-    def add_data(self):
+    def add_data(self) -> None:
         table_name = self.company_name + self.user_name
         work_date = self.date_label_entry.get()
         company_name = self.company_entry.get()
@@ -77,18 +77,22 @@ class Window():
         material_cost = self.materialcost_entry.get()
         sales = self.sales_entry.get()
         
-        self.data_dict["work_date"] = work_date
-        self.data_dict["company_name"] = company_name
-        self.data_dict["work_place"] = work_place
-        self.data_dict["work_detail"] = work_detail
-        self.data_dict["worker"] = int(worker)
-        self.data_dict["worker_cost"] = int(worker_cost)
-        self.data_dict["material_cost"] = int(material_cost)
-        self.data_dict["sales"] = int(sales)
-        db_ctr = DatabaseControl()
-        db_ctr.insert_data(table_name, self.data_dict)
-        self.subwindow.destroy() 
-        self._update_window()
+        if work_date == "" and company_name == "" and work_place == "" and work_detail == "":
+            messagebox.showinfo("確認", "日付、会社名、現場名、作業内容は\n入力必須項目です")
+            self.open_add_inputdata()
+        else:
+            self.data_dict["work_date"] = work_date
+            self.data_dict["company_name"] = company_name
+            self.data_dict["work_place"] = work_place
+            self.data_dict["work_detail"] = work_detail
+            self.data_dict["worker"] = int(worker)
+            self.data_dict["worker_cost"] = int(worker_cost)
+            self.data_dict["material_cost"] = int(material_cost)
+            self.data_dict["sales"] = int(sales)
+            db_ctr = DatabaseControl()
+            db_ctr.insert_data(table_name, self.data_dict)
+            self.subwindow.destroy() 
+            self._update_window()
 
     #登録データを編集する
     def update_data(self) -> None:
